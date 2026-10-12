@@ -1,0 +1,27 @@
+# Gitea local (Git + Actions) para la demo. 100% offline una vez descargada la imagen.
+# Puerto 3030 para no chocar con Grafana (3000) del lab.
+# Define VM_IP en el fichero .env (IP de la VM en la red del portatil).
+
+services:
+  gitea:
+    image: gitea/gitea:1.24
+    container_name: gitea
+    restart: unless-stopped
+    environment:
+      USER_UID: "1000"
+      USER_GID: "1000"
+      GITEA__server__ROOT_URL: "http://${VM_IP}:3030/"
+      GITEA__server__HTTP_PORT: "3000"
+      GITEA__server__SSH_PORT: "2222"
+      GITEA__actions__ENABLED: "true"
+      GITEA__security__INSTALL_LOCK: "true"
+      GITEA__service__DISABLE_REGISTRATION: "true"
+      GITEA__database__DB_TYPE: "sqlite3"
+      GITEA__repository__DEFAULT_BRANCH: "main"
+    volumes:
+      - ./data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3030:3000"
+      - "2222:22"

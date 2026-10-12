@@ -1,0 +1,4 @@
+gitea/.env
+gitea/data/
+__pycache__/
+*.pyc

@@ -1,0 +1,11 @@
+# === PARCHE NETOPS DEMO ===
+# Sustituye a configs/prometheus/prometheus.yml del srl-telemetry-lab.
+# Unico cambio: scrape_interval 5s -> 2s para que Grafana reaccione antes.
+
+global:
+  scrape_interval: 2s
+
+scrape_configs:
+  - job_name: "gnmic"
+    static_configs:
+      - targets: ["gnmic:9273"]

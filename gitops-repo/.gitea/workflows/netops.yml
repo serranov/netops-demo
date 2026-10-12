@@ -1,0 +1,89 @@
+# Pipeline GitOps (Gitea Actions, runner en modo host con label 'lab').
+#
+#   push a rama != main   -> validate : lint + prerrequisitos + PLAN (dry-run --prune). Check del Pull Request.
+#   push a main (merge)   -> deploy   : reconcilia la intencion en el nodo (gnmic set) y verifica por etapa;
+#                                        anota el despliegue en Grafana.
+#                         -> promote  : si la siguiente etapa de stages/<nodo>.yml tiene auto_promote: true,
+#                                        crea su rama y abre el Pull Request (una persona lo revisa y mergea).
+#
+# Secrets (Settings -> Actions -> Secrets):
+#   GITEA_PAT     : token con permiso de ESCRITURA en el repositorio (clone + push de la rama + API de PRs)
+#   SRL_PASSWORD  : password de admin en SR Linux (por defecto en el lab: NokiaSrl1!)
+
+name: netops
+
+on:
+  push:
+    branches: ["**"]
+
+env:
+  NODE: leaf3
+  GITEA_URL: http://localhost:3030
+
+jobs:
+  validate:
+    if: github.ref_name != 'main'
+    runs-on: lab
+    steps:
+      - name: Checkout (${{ github.ref_name }})
+        run: |
+          rm -rf src
+          git clone --quiet --depth 1 --branch "${{ github.ref_name }}" \
+            "http://${{ github.repository_owner }}:${{ secrets.GITEA_PAT }}@localhost:3030/${{ github.repository }}.git" src
+
+      - name: Lint (YAML, sintaxis, estado del rollout)
+        run: |
+          cd src
+          python3 -c "import yaml,sys; [yaml.safe_load(open(f)) for f in sys.argv[1:]]; print('YAML OK')" intent/$NODE.yml stages/$NODE.yml
+          python3 -m py_compile scripts/netops.py scripts/promote.py && echo "scripts OK"
+          python3 scripts/promote.py --node "$NODE" --list
+
+      - name: Prerrequisitos y plan (dry-run contra el nodo)
+        env:
+          SRL_PASSWORD: ${{ secrets.SRL_PASSWORD }}
+        run: |
+          cd src
+          python3 scripts/netops.py --intent intent/$NODE.yml --dry-run --prune
+
+  deploy:
+    if: github.ref_name == 'main'
+    runs-on: lab
+    steps:
+      - name: Checkout (main)
+        run: |
+          rm -rf src
+          git clone --quiet --depth 1 --branch main \
+            "http://${{ github.repository_owner }}:${{ secrets.GITEA_PAT }}@localhost:3030/${{ github.repository }}.git" src
+
+      - name: Deploy (gnmic set -> SR Linux) y verificacion por etapa
+        env:
+          SRL_PASSWORD: ${{ secrets.SRL_PASSWORD }}
+        run: |
+          cd src
+          python3 scripts/netops.py --intent intent/$NODE.yml --apply --prune --wait 45
+
+      - name: Anotar el despliegue en Grafana (correlar cambio y efecto)
+        if: always()
+        run: |
+          MSG="$(git -C src log -1 --pretty=%s)"
+          jq -n --arg t "deploy ${{ job.status }}: $MSG" '{tags:["netops","deploy"],text:$t}' \
+            | curl -s -o /dev/null -X POST http://localhost:3000/api/annotations -H 'Content-Type: application/json' -d @- || true
+
+  promote:
+    if: github.ref_name == 'main'
+    needs: deploy
+    runs-on: lab
+    steps:
+      - name: Checkout (main, historial completo para crear la rama)
+        run: |
+          rm -rf src
+          git clone --quiet --branch main \
+            "http://${{ github.repository_owner }}:${{ secrets.GITEA_PAT }}@localhost:3030/${{ github.repository }}.git" src
+
+      - name: Proponer la siguiente etapa (solo si auto_promote)
+        env:
+          GITEA_PAT: ${{ secrets.GITEA_PAT }}
+          GITEA_REPO: ${{ github.repository }}
+        run: |
+          cd src
+          python3 scripts/promote.py --node "$NODE" --next --auto --open-pr

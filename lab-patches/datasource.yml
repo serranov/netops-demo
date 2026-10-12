@@ -1,0 +1,17 @@
+# === PARCHE NETOPS DEMO ===
+# Sustituye a configs/grafana/datasource.yml del srl-telemetry-lab.
+# Unico cambio: fijar EXPLICITAMENTE los uids que Grafana ya generaba de forma
+# automatica a partir del nombre (y que el dashboard del lab referencia).
+# Asi el dashboard del lab y netops-demo.json apuntan al mismo datasource.
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    uid: PBFA97CFB590B2093
+    url: http://prometheus:9090
+  - name: Loki
+    type: loki
+    uid: P8E80F9AEF21F6940
+    url: http://loki:3100

@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+"""
+gnmic SIMULADO: un mini SR Linux en un fichero JSON (MOCK_STATE) para probar scripts/netops.py sin lab.
+
+Modela: grupos BGP, vecinos (estado + grupo), network-instances (tipo, oper-state, miembros),
+subinterfaces y vxlan-interfaces. Reglas: un vecino pasa a `established` si su grupo existe;
+un mac-vrf esta `up` si existe. MOCK_SHAPE=leaf responde con una actualizacion por hoja en vez
+de subarbol. MOCK_START=full|day0 fija el estado inicial (por defecto full = como el lab recien
+desplegado, con overlay y servicio en leaf3).
+"""
+import json
+import os
+import re
+import sys
+
+STATE = os.environ.get("MOCK_STATE", "/tmp/mock-gnmic.json")
+SHAPE = os.environ.get("MOCK_SHAPE", "tree")
+START = os.environ.get("MOCK_START", "full")
+NI = "srl_nokia-network-instance:network-instance"
+
+
+def initial():
+    dev = {
+        "groups": {"eBGP": {}},
+        "neighbors": {"192.168.31.1": {"group": "eBGP", "state": "established"},
+                      "192.168.32.1": {"group": "eBGP", "state": "established"}},
+        "ni": {"default": {"type": "default", "oper": "up"}, "mgmt": {"type": "ip-vrf", "oper": "up"}},
+        "subifs": {}, "vxlanifs": {},
+    }
+    if START == "full":
+        dev["groups"]["iBGP-overlay"] = {"peer-as": 100}
+        dev["neighbors"]["10.0.2.1"] = {"group": "iBGP-overlay", "state": "established"}
+        dev["neighbors"]["10.0.2.2"] = {"group": "iBGP-overlay", "state": "established"}
+        dev["subifs"]["ethernet-1/1.0"] = {"type": "bridged"}
+        dev["vxlanifs"]["vxlan1.1"] = {"vni": 1}
+        dev["ni"]["vrf-1"] = {"type": "mac-vrf", "oper": "up",
+                              "interface": ["ethernet-1/1.0"], "vxlan-interface": ["vxlan1.1"]}
+    return dev
+
+
+def load():
+    if not os.path.exists(STATE):
+        save(initial())
+    with open(STATE) as fh:
+        return json.load(fh)
+
+
+def save(d):
+    with open(STATE, "w") as fh:
+        json.dump(d, fh)
+
+
+def arg_after(args, flag):
+    return args[args.index(flag) + 1] if flag in args else None
+
+
+def respond(updates):
+    print(json.dumps([{"source": "mock", "timestamp": 0, "updates": updates}], indent=1))
+
+
+def list_response(base, list_name, key, rows, leaf):
+    """rows: [(keyvalue, leafvalue)]. Subarbol o una actualizacion por hoja segun MOCK_SHAPE."""
+    if SHAPE == "leaf":
+        return [{"Path": f"{base}/{list_name}[{key}={k}]/{leaf}", "values": {f"{base}/{list_name}/{leaf}": v}}
+                for k, v in rows]
+    return [{"Path": base, "values": {base: {list_name: [{key: k, leaf: v} for k, v in rows]}}}]
+
+
+def do_get(args):
+    dev = load()
+    path = arg_after(args, "--path") or ""
+    bgp = "srl_nokia-network-instance:network-instance[name=default]/protocols/bgp"
+    if "bgp/group[group-name=*]/group-name" in path:
+        respond(list_response(bgp, "group", "group-name", [(g, g) for g in sorted(dev["groups"])], "group-name"))
+    elif "bgp/neighbor[peer-address=*]/session-state" in path:
+        respond(list_response(bgp, "neighbor", "peer-address",
+                              [(p, i["state"]) for p, i in sorted(dev["neighbors"].items())], "session-state"))
+    elif "bgp/neighbor[peer-address=*]/peer-group" in path:
+        respond(list_response(bgp, "neighbor", "peer-address",
+                              [(p, i["group"]) for p, i in sorted(dev["neighbors"].items())], "peer-group"))
+    elif path.startswith("/network-instance[name=*]/type"):
+        respond(list_response("", "network-instance", "name",
+                              [(n, i["type"]) for n, i in sorted(dev["ni"].items())], "type"))
+    elif path.startswith("/network-instance[name=*]/oper-state"):
+        respond(list_response("", "network-instance", "name",
+                              [(n, i["oper"]) for n, i in sorted(dev["ni"].items())], "oper-state"))
+    elif "bridge-table/statistics/active-entries" in path:
+        m = re.search(r"network-instance\[name=([^\]]+)\]", path)
+        respond([{"Path": path.strip("/"), "values": {"active-entries": 3 if m and m.group(1) in dev["ni"] else 0}}])
+    elif re.fullmatch(r"/network-instance\[name=[^\]]+\]", path):
+        name = re.search(r"name=([^\]]+)", path).group(1)
+        ni = dev["ni"].get(name)
+        if not ni:
+            respond([])
+            return
+        respond([{"Path": f"{NI}[name={name}]", "values": {NI: {
+            "name": name, "type": ni["type"],
+            "interface": [{"name": x} for x in ni.get("interface", [])],
+            "vxlan-interface": [{"name": x} for x in ni.get("vxlan-interface", [])]}}}])
+    else:
+        respond([])
+
+
+def do_set(args):
+    dev = load()
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a == "--delete":
+            p = args[i + 1]; i += 2
+            if m := re.search(r"bgp/neighbor\[peer-address=([^\]]+)\]$", p):
+                dev["neighbors"].pop(m.group(1), None)
+            elif m := re.search(r"bgp/group\[group-name=([^\]]+)\]$", p):
+                if any(n["group"] == m.group(1) for n in dev["neighbors"].values()):
+                    sys.exit("mock: no se puede borrar un grupo con vecinos (la transaccion debe incluirlos)")
+                dev["groups"].pop(m.group(1), None)
+            elif m := re.fullmatch(r"/network-instance\[name=([^\]]+)\]", p):
+                dev["ni"].pop(m.group(1), None)
+            elif m := re.search(r"/interface\[name=([^\]]+)\]/subinterface\[index=(\d+)\]", p):
+                dev["subifs"].pop(f"{m.group(1)}.{m.group(2)}", None)
+            elif m := re.search(r"/tunnel-interface\[name=([^\]]+)\]/vxlan-interface\[index=(\d+)\]", p):
+                dev["vxlanifs"].pop(f"{m.group(1)}.{m.group(2)}", None)
+            else:
+                sys.exit(f"mock: delete no soportado: {p}")
+        elif a == "--update-path":
+            p, f = args[i + 1], args[i + 3]; i += 4
+            with open(f) as fh:
+                payload = json.load(fh)
+            if m := re.search(r"bgp/group\[group-name=([^\]]+)\]$", p):
+                dev["groups"][m.group(1)] = payload
+            elif m := re.search(r"bgp/neighbor\[peer-address=([^\]]+)\]$", p):
+                g = payload["peer-group"]
+                assert payload.get("admin-state") == "enable", "vecino sin admin-state enable"
+                dev["neighbors"][m.group(1)] = {"group": g, "state": "established" if g in dev["groups"] else "idle"}
+            elif m := re.search(r"/interface\[name=([^\]]+)\]/subinterface\[index=(\d+)\]", p):
+                dev["subifs"][f"{m.group(1)}.{m.group(2)}"] = payload
+            elif m := re.search(r"/tunnel-interface\[name=([^\]]+)\]/vxlan-interface\[index=(\d+)\]", p):
+                dev["vxlanifs"][f"{m.group(1)}.{m.group(2)}"] = {"vni": payload["ingress"]["vni"]}
+            elif m := re.fullmatch(r"/network-instance\[name=([^\]]+)\]", p):
+                for x in payload.get("interface", []):
+                    assert x["name"] in dev["subifs"], f"subinterfaz {x['name']} no existe"
+                for x in payload.get("vxlan-interface", []):
+                    assert x["name"] in dev["vxlanifs"], f"vxlan-interface {x['name']} no existe"
+                assert payload["protocols"]["bgp-evpn"]["bgp-instance"][0]["evi"], "evi obligatorio"
+                dev["ni"][m.group(1)] = {"type": payload["type"].split(":")[-1], "oper": "up",
+                                         "interface": [x["name"] for x in payload.get("interface", [])],
+                                         "vxlan-interface": [x["name"] for x in payload.get("vxlan-interface", [])]}
+            else:
+                sys.exit(f"mock: update no soportado: {p}")
+        else:
+            i += 1
+    # un vecino cuyo grupo desaparece queda idle; si existe, established
+    for n in dev["neighbors"].values():
+        n["state"] = "established" if n["group"] in dev["groups"] else "idle"
+    save(dev)
+    print("[mock] set ok")
+
+
+def main(argv):
+    args = argv[1:]
+    if "get" in args:
+        do_get(args)
+    elif "set" in args:
+        do_set(args)
+    else:
+        sys.exit("mock gnmic: comando no soportado")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

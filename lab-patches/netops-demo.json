@@ -1,0 +1,105 @@
+{
+  "uid": "netops-demo",
+  "title": "NetOps - Onboarding de leaf3 (GitOps)",
+  "tags": ["netops", "gitops", "evpn"],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "version": 2,
+  "time": { "from": "now-15m", "to": "now" },
+  "templating": { "list": [] },
+  "annotations": {
+    "list": [
+      {
+        "name": "Despliegues GitOps",
+        "enable": true,
+        "iconColor": "orange",
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "target": { "type": "tags", "tags": ["netops"], "matchAny": true, "limit": 100 }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1, "type": "stat",
+      "title": "Dia 0 - underlay eBGP (leaf3)",
+      "description": "Sesiones eBGP de underlay establecidas en leaf3 hacia spine1/spine2. Es el prerrequisito del overlay y NO lo gestiona GitOps.",
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "refId": "A", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "sum(network_instance_protocols_bgp_neighbor_session_state{source=\"leaf3\", neighbor_peer_address=~\"192\\\\.168\\\\..*\"})",
+        "legendFormat": "underlay" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value", "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 0, "noValue": "0", "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "orange", "value": 1 }, { "color": "green", "value": 2 } ] } }, "overrides": [] }
+    },
+    {
+      "id": 2, "type": "stat",
+      "title": "Dia 1 - overlay iBGP EVPN (leaf3)",
+      "description": "Sesiones iBGP EVPN de leaf3 hacia los route reflectors (10.0.2.1, 10.0.2.2). Etapa 'overlay' del rollout.",
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "refId": "A", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "sum(network_instance_protocols_bgp_neighbor_session_state{source=\"leaf3\", neighbor_peer_address=~\"10\\\\.0\\\\.2\\\\..*\"}) or vector(0)",
+        "legendFormat": "overlay" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value", "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 0, "noValue": "0", "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "orange", "value": 1 }, { "color": "green", "value": 2 } ] } }, "overrides": [] }
+    },
+    {
+      "id": 3, "type": "stat",
+      "title": "Dia 2 - servicio vrf-1 (mac-vrf) por leaf",
+      "description": "oper-state del network-instance vrf-1 en cada leaf. Etapa 'service': leaf3 pasa de ausente a UP.",
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 0 },
+      "targets": [{ "refId": "A", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "max by (source) (network_instance_oper_state{network_instance_name=\"vrf-1\"})",
+        "legendFormat": "{{source}}" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "horizontal", "textMode": "value_and_name", "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 0, "noValue": "AUSENTE", "color": { "mode": "thresholds" },
+        "mappings": [ { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } } ],
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] } }, "overrides": [] }
+    },
+    {
+      "id": 4, "type": "state-timeline",
+      "title": "leaf3 - estado de sesion por vecino BGP (las lineas naranjas son despliegues GitOps)",
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 7 },
+      "targets": [{ "refId": "A", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "network_instance_protocols_bgp_neighbor_session_state{source=\"leaf3\"}",
+        "legendFormat": "{{neighbor_peer_address}}" }],
+      "options": { "mergeValues": true, "showValue": "always", "alignValue": "center", "rowHeight": 0.8,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "red" },
+        "mappings": [ { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "ESTABLISHED", "color": "green" } } } ] }, "overrides": [] }
+    },
+    {
+      "id": 5, "type": "timeseries",
+      "title": "MACs activas en vrf-1 por leaf (el servicio aprende al nuevo servidor)",
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [{ "refId": "A", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "network_instance_bridge_table_statistics_active_entries{network_instance_name=\"vrf-1\"}",
+        "legendFormat": "{{source}}" }],
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 0, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10, "showPoints": "never" } }, "overrides": [] }
+    },
+    {
+      "id": 6, "type": "timeseries",
+      "title": "leaf3 e1-1 - trafico del servidor client3",
+      "description": "Sin servicio no hay trafico en el puerto de acceso; al crear vrf-1 el servidor entra en el dominio L2 EVPN.",
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+          "expr": "interface_traffic_rate_in_bps{source=\"leaf3\", interface_name=\"e1-1\"}", "legendFormat": "e1-1 IN" },
+        { "refId": "B", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+          "expr": "interface_traffic_rate_out_bps{source=\"leaf3\", interface_name=\"e1-1\"}", "legendFormat": "e1-1 OUT" }
+      ],
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "fieldConfig": { "defaults": { "unit": "bps", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "showPoints": "never" } }, "overrides": [] }
+    }
+  ]
+}

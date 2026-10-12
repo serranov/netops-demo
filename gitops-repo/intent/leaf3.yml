@@ -1,0 +1,33 @@
+# =====================================================================
+#  INTENCION DE RED - leaf3           (fuente de verdad: este repositorio)
+# =====================================================================
+# Describe el estado deseado del leaf que GitOps gestiona. scripts/netops.py lo
+# reconcilia contra el nodo por gNMI: añade lo que falta, asegura lo que existe y,
+# con --prune, elimina lo que posee (ownership) y ya no esta declarado.
+#
+# Ciclo de vida de un leaf nuevo (ver stages/leaf3.yml):
+#   dia 0  underlay eBGP a los spines  -> fuera del alcance de GitOps (bootstrap/startup-config)
+#   dia 1  overlay iBGP EVPN           -> bgp.groups      (etapa "overlay")
+#   dia 2  servicio del tenant         -> services        (etapa "service")
+#
+# Estado actual de este fichero: DIA 0 (nada gestionado aun).
+
+node: leaf3
+target: 172.80.80.13            # IP de gestion en la red 'st' de containerlab
+network_instance: default       # network-instance donde vive BGP
+
+# Prerrequisito de dia 0 que se comprueba antes de tocar el overlay: al menos una
+# sesion establecida en el grupo de underlay (no gestionado por GitOps).
+prerequisites:
+  underlay_group: eBGP
+
+# Lo que GitOps POSEE en este nodo. Un objeto poseido que no este declarado mas
+# abajo se ELIMINA con --prune (asi un `git revert` deshace el cambio en la red).
+ownership:
+  bgp_groups: [iBGP-overlay]
+  services: [vrf-1]
+
+bgp:
+  groups: []
+
+services: []
