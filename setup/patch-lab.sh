@@ -17,11 +17,11 @@ for f in configs/gnmic/gnmic-config.yml configs/prometheus/prometheus.yml config
   [[ -f "$f.orig" ]] || cp "$f" "$f.orig"
 done
 
-echo ">> Aplicando parches"
-cp "$KIT_DIR/lab-patches/gnmic-config.yml"  configs/gnmic/gnmic-config.yml
-cp "$KIT_DIR/lab-patches/prometheus.yml"    configs/prometheus/prometheus.yml
-cp "$KIT_DIR/lab-patches/datasource.yml"    configs/grafana/datasource.yml
-cp "$KIT_DIR/lab-patches/netops-demo.json"  configs/grafana/dashboards/netops-demo.json
+echo ">> Aplicando parches (modo 0644: los contenedores corren con otro uid y deben poder leerlos)"
+install -m 0644 "$KIT_DIR/lab-patches/gnmic-config.yml"  configs/gnmic/gnmic-config.yml
+install -m 0644 "$KIT_DIR/lab-patches/prometheus.yml"    configs/prometheus/prometheus.yml
+install -m 0644 "$KIT_DIR/lab-patches/datasource.yml"    configs/grafana/datasource.yml
+install -m 0644 "$KIT_DIR/lab-patches/netops-demo.json"  configs/grafana/dashboards/netops-demo.json
 
 echo ">> Resumen de cambios respecto al upstream:"
 git --no-pager diff --stat

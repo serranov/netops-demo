@@ -356,6 +356,7 @@ Añade un caso a `tests/run.sh` por cada comportamiento nuevo (una línea `t "no
 | `docker pull` falla con proxy | demonio sin proxy | `/etc/docker/daemon.json` con `proxies` + `systemctl restart docker` |
 | `gnmic` "connection refused" en los logs | nodos arrancando | solo el primer minuto; `--since 5m` debe dar 0 |
 | `gnmic` falla con proxy configurado | gRPC usa `HTTPS_PROXY` | `172.80.80.0/24` en `no_proxy` |
+| Dashboard NetOps no aparece; log `permission denied` | fichero sin permiso de lectura para uid 472 | `chmod 644 ~/srl-telemetry-lab/configs/grafana/dashboards/*.json` (el `patch` actual ya instala con 0644) |
 | Grafana con triángulos rojos / NetOps vacío | uid de datasource | `datasource.yml` del kit (`PBFA97CFB590B2093` / `P8E80F9AEF21F6940`); `docker restart grafana` |
 | Grafana `running` pero :3000 no responde | plugin FlowPanel sin proxy | variables en el nodo grafana (§3) + `--node-filter grafana` |
 | Grafana paneles vacíos solo con proxy | consulta datasources vía proxy | `NO_PROXY: …,prometheus,loki` en el nodo grafana |
