@@ -19,8 +19,8 @@ c_hdr()  { printf '\n\033[1;36m== %s\033[0m\n' "$*"; }
 dk() { docker "$@" 2>/dev/null || sudo docker "$@"; }
 
 # propietario y nombre del repo GitOps, a partir del remote (para construir URLs de Gitea)
-repo_owner() { git -C "$REPO_DIR" remote get-url origin 2>/dev/null | sed -E 's#.*/([^/]+)/[^/]+?(\.git)?$#\1#'; }
-repo_name()  { git -C "$REPO_DIR" remote get-url origin 2>/dev/null | sed -E 's#.*/([^/]+?)(\.git)?$#\1#'; }
+repo_name()  { basename -s .git "$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null)"; }
+repo_owner() { basename "$(dirname "$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null)")"; }
 
 # Estado de leaf3 segun netops.py (grupos, vecinos, servicios)
 node_show() { python3 "$REPO_DIR/scripts/netops.py" --intent "$REPO_DIR/intent/$NODE.yml" --show; }

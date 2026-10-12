@@ -30,6 +30,7 @@ jobs:
           rm -rf src
           git clone --quiet --depth 1 --branch "${{ github.ref_name }}" \
             "http://${{ github.repository_owner }}:${{ secrets.GITEA_PAT }}@localhost:3030/${{ github.repository }}.git" src
+          git -C src fetch --quiet --depth 1 origin main:refs/remotes/origin/main   # para comparar el rollout contra main
 
       - name: Lint (YAML, sintaxis, estado del rollout)
         run: |

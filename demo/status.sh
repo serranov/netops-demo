@@ -24,7 +24,7 @@ code="$(curl -s -o /dev/null -w '%{http_code}' localhost:3000/api/health || true
 [[ "$code" == "200" ]] && c_ok "  Grafana: OK (:3000)" || c_warn "  Grafana no responde (HTTP ${code:-000}); con proxy, revisa las variables del nodo grafana en st.clab.yml"
 
 c_hdr "Gitea y runner"
-dk ps --format '  {{.Names}}  {{.Status}}' | grep -E '^  gitea' || c_warn "  gitea no corre (make gitea-up)"
+if dk ps --format '{{.Names}}' | grep -qx gitea; then c_ok "  gitea: $(dk ps --filter name='^gitea$' --format '{{.Status}}')"; else c_warn "  gitea no corre (make gitea-up)"; fi
 systemctl is-active act_runner >/dev/null 2>&1 && c_ok "  act_runner: active" || c_warn "  act_runner: NO activo (sudo systemctl start act_runner)"
 
 c_hdr "Repo GitOps"

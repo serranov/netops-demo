@@ -10,24 +10,22 @@
 #   dia 1  overlay iBGP EVPN           -> bgp.groups      (etapa "overlay")
 #   dia 2  servicio del tenant         -> services        (etapa "service")
 #
-# Estado actual de este fichero: DIA 0 (nada gestionado aun).
-
+# Claves:
+#   target          IP de gestion del nodo en la red 'st' de containerlab
+#   prerequisites   grupo BGP de underlay que debe estar established antes de tocar el overlay
+#   ownership       lo que GitOps POSEE: si esta aqui y no esta declarado abajo, --prune lo elimina
+#
+# Estado actual de este fichero: dia 0 (nada gestionado aun)
 node: leaf3
-target: 172.80.80.13            # IP de gestion en la red 'st' de containerlab
-network_instance: default       # network-instance donde vive BGP
-
-# Prerrequisito de dia 0 que se comprueba antes de tocar el overlay: al menos una
-# sesion establecida en el grupo de underlay (no gestionado por GitOps).
+target: 172.80.80.13
+network_instance: default
 prerequisites:
   underlay_group: eBGP
-
-# Lo que GitOps POSEE en este nodo. Un objeto poseido que no este declarado mas
-# abajo se ELIMINA con --prune (asi un `git revert` deshace el cambio en la red).
 ownership:
-  bgp_groups: [iBGP-overlay]
-  services: [vrf-1]
-
+  bgp_groups:
+  - iBGP-overlay
+  services:
+  - vrf-1
 bgp:
   groups: []
-
 services: []

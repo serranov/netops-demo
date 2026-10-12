@@ -85,7 +85,8 @@ def load(node):
         raise SystemExit(f"no existe {stages_file}")
     stages = yaml.safe_load(stages_file.read_text()) or {}
     # la referencia es SIEMPRE lo que hay en main (no el arbol de trabajo, que puede estar en otra rama)
-    main_intent = git("show", f"main:intent/{node}.yml", check=False)
+    main_intent = git("show", f"main:intent/{node}.yml", check=False) \
+        or git("show", f"origin/main:intent/{node}.yml", check=False)
     intent = yaml.safe_load(main_intent or intent_file.read_text()) or {}
     st = sorted(stages.get("stages", []), key=lambda s: s.get("order", 0))
     return st, intent, intent_file
@@ -96,15 +97,21 @@ def status(stages, intent):
 
 
 def write_intent(intent_file, intent, stage):
+    """Reescribe la intencion conservando la cabecera de comentarios y actualizando su linea de estado."""
     header = []
     for line in intent_file.read_text().splitlines():
         if line.startswith("#"):
             header.append(line)
         else:
             break
+    state = f"# Estado actual de este fichero: etapa '{stage['name']}' fusionada (order {stage.get('order', 0)})"
+    idx = next((i for i, l in enumerate(header) if l.startswith("# Estado actual")), None)
+    if idx is None:
+        header.append(state)
+    else:
+        header[idx] = state
     body = yaml.safe_dump(intent, sort_keys=False, allow_unicode=True, default_flow_style=False)
-    note = f"# Ultima etapa fusionada por promote.py: {stage['name']} (order {stage.get('order', 0)})"
-    intent_file.write_text("\n".join(header + [note, ""]) + body)
+    intent_file.write_text("\n".join(header) + "\n" + body)
 
 
 def create_branch(stage, intent, intent_file):
