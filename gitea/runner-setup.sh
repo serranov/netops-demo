@@ -19,6 +19,12 @@ if [[ ! -x ./act_runner ]]; then
   chmod +x act_runner
 fi
 
+if [[ -f .runner ]]; then
+  echo ">> Hay un registro previo (.runner): se elimina para registrar contra la instancia actual de Gitea"
+  sudo systemctl stop act_runner 2>/dev/null || true
+  rm -f .runner
+fi
+
 echo ">> Generando token de registro en Gitea..."
 TOKEN="$(docker exec -u git gitea gitea actions generate-runner-token | tr -d '\r\n')"
 
@@ -51,8 +57,9 @@ WantedBy=multi-user.target
 EOF
 
 sudo systemctl daemon-reload
-sudo systemctl enable --now act_runner
-sleep 2
+sudo systemctl enable act_runner >/dev/null 2>&1
+sudo systemctl restart act_runner          # restart, no 'enable --now': si ya corria con otro registro, debe recargarlo
+sleep 3
 sudo systemctl --no-pager status act_runner | head -n 8
 echo
 echo ">> Listo. Comprueba en Gitea: Site Administration -> Actions -> Runners (debe aparecer '${RUNNER_NAME}' Idle)."
