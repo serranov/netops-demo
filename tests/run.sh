@@ -91,7 +91,7 @@ reset_mock; MOCK_START=day0 promote --node leaf3 --stage overlay >/dev/null
 MOCK_START=day0 t "cuerpo: seccion Que cambia desde la etapa"   "Etapa.*overlay.*order 10"                         promote --node leaf3 --pr --print
 MOCK_START=day0 t "cuerpo: plan real con las altas del overlay" "\+ AÑADIR +vecino 10\.0\.2\.2"                    promote --node leaf3 --pr --print
 MOCK_START=day0 t "cuerpo: checklist con impacto calculado"     "\[x\] Impacto: 3 alta\(s\), 0 baja\(s\)"         promote --node leaf3 --pr --print
-t "pr sin GITEA_PAT: error claro (rc=1)"                        "falta GITEA_PAT" --rc 1                            env -u GITEA_PAT python3 "$REPO/scripts/promote.py" --node leaf3 --pr
+t "pr sin NETOPS_PAT: error claro (rc=1)"                       "falta NETOPS_PAT" --rc 1                           env -u NETOPS_PAT -u GITEA_PAT python3 "$REPO/scripts/promote.py" --node leaf3 --pr
 
 echo "== validacion estatica"
 t "py_compile"  "^$" python3 -m py_compile "$REPO/scripts/netops.py" "$REPO/scripts/promote.py"

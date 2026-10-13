@@ -28,14 +28,14 @@ if dk ps --format '{{.Names}}' | grep -qx gitea; then c_ok "  gitea: $(dk ps --f
 systemctl is-active act_runner >/dev/null 2>&1 && c_ok "  act_runner: active" || c_warn "  act_runner: NO activo (sudo systemctl start act_runner)"
 if [[ -f "$KIT_DIR/gitea/.env" ]]; then
   set -a; source "$KIT_DIR/gitea/.env"; set +a
-  if [[ -n "${GITEA_PAT:-}" ]]; then
-    names="$(curl -s -H "Authorization: token ${GITEA_PAT}" "http://localhost:3030/api/v1/repos/$(repo_owner)/$(repo_name)/actions/secrets" \
+  if [[ -n "${NETOPS_PAT:-}" ]]; then
+    names="$(curl -s -H "Authorization: token ${NETOPS_PAT}" "http://localhost:3030/api/v1/repos/$(repo_owner)/$(repo_name)/actions/secrets" \
       | python3 -c 'import sys,json; d=json.load(sys.stdin); print(" ".join(sorted(x["name"] for x in d)) if isinstance(d,list) else "")' 2>/dev/null || true)"
-    for sname in GITEA_PAT SRL_PASSWORD; do
+    for sname in NETOPS_PAT SRL_PASSWORD; do
       grep -qw "$sname" <<< "$names" && c_ok "  secret $sname: definido" || c_warn "  secret $sname: FALTA en el repo (make secrets)"
     done
   else
-    c_warn "  GITEA_PAT vacio en gitea/.env: make push y make secrets no funcionaran"
+    c_warn "  NETOPS_PAT vacio en gitea/.env: make push y make secrets no funcionaran"
   fi
 fi
 

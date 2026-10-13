@@ -62,7 +62,7 @@ netops-demo/
 │   └── netops-demo.json       ← dashboard "NetOps - Onboarding de leaf3" (día 0/1/2 + anotaciones de deploy)
 ├── gitea/
 │   ├── docker-compose.yml     ← Gitea en :3030 (Actions habilitado)
-│   ├── .env.example           ← VM_IP (lo que escribes en el navegador) y GITEA_PAT (para que make push abra el PR)
+│   ├── .env.example           ← VM_IP (lo que escribes en el navegador) y NETOPS_PAT (para que make push abra el PR)
 │   └── runner-setup.sh        ← act_runner en modo host, label 'lab', servicio systemd
 ├── gitops-repo/               ← contenido inicial del repositorio GitOps `netops-gitops`
 │   ├── intent/leaf3.yml       ← la INTENCIÓN (estado base = día 0; ownership de lo que GitOps posee)
@@ -216,7 +216,7 @@ Toda la capa GitOps corre en la VM: no depende de ningún servicio externo.
 ```bash
 cd ~/netops-demo/gitea
 cp .env.example .env                       # VM_IP = lo que escribes en el navegador: localhost (túnel), IP o DNS
-                                           # GITEA_PAT = lo rellenas en el paso 2 de abajo
+                                           # NETOPS_PAT = lo rellenas en el paso 2 de abajo
 docker compose up -d && sleep 10
 # usuario de Gitea (independiente de los usuarios Linux; username/password/email son libres)
 docker exec -u git gitea gitea admin user create --admin --username <usuario> \
@@ -226,8 +226,8 @@ docker exec -u git gitea gitea admin user create --admin --username <usuario> \
 Abre `http://localhost:3030` (o la IP), entra y:
 
 1. **Nuevo repositorio** → `netops-gitops` (vacío, sin README).
-2. **Token personal**: avatar → *Settings → Applications → Generate new token* → `netops-pipeline`, permiso **repository: Read and Write** (sirve para que `make push` y el job `promote` abran PRs por API). Cópialo y ponlo también en `gitea/.env` como `GITEA_PAT=…`.
-3. **Secrets del repo** (los lee el pipeline; no confundir con `gitea/.env`, que solo lo usa tu shell): una vez creado el repositorio y configurado el remote del paso §7, ejecuta `make secrets`, que crea `GITEA_PAT` y `SRL_PASSWORD` por API a partir de `gitea/.env`. (A mano: `netops-gitops → Settings → Actions → Secrets`.) `make status` avisa si faltan.
+2. **Token personal**: avatar → *Settings → Applications → Generate new token* → `netops-pipeline`, permiso **repository: Read and Write** (sirve para que `make push` y el job `promote` abran PRs por API). Cópialo y ponlo también en `gitea/.env` como `NETOPS_PAT=…`.
+3. **Secrets del repo** (los lee el pipeline; no confundir con `gitea/.env`, que solo lo usa tu shell): una vez creado el repositorio y configurado el remote del paso §7, ejecuta `make secrets`, que crea `NETOPS_PAT` y `SRL_PASSWORD` por API a partir de `gitea/.env`. Ojo al nombre: Gitea **rechaza** secrets que empiecen por `GITEA_` o `GITHUB_`. (A mano: `netops-gitops → Settings → Actions → Secrets`.) `make status` avisa si faltan.
 
 ### 6.2 Runner (modo host)
 
@@ -252,7 +252,7 @@ git tag day0                                           # ← estado base al que 
 git remote add origin http://<usuario>@localhost:3030/<usuario>/netops-gitops.git
 git config credential.helper store                     # guarda el password/PAT tras el primer push
 git push -u origin main --tags
-cd ~/netops-demo && make secrets                       # secrets del pipeline (GITEA_PAT, SRL_PASSWORD) por API
+cd ~/netops-demo && make secrets                       # secrets del pipeline (NETOPS_PAT, SRL_PASSWORD) por API
 ```
 
 Ese primer push lanza `deploy`. La intención base no declara overlay ni servicio pero **los posee** (`ownership`), y el job usa `--prune`: **los elimina de leaf3** (que el lab arranca completo). A partir de aquí el repositorio manda y leaf3 está en día 0. *Actions* debe terminar en verde con `DEPLOY OK`; el job `promote` dirá que la siguiente etapa no es automática.
@@ -370,14 +370,15 @@ Añade un caso a `tests/run.sh` por cada comportamiento nuevo (una línea `t "no
 | Job **Waiting** | runner caído o label | `sudo systemctl status act_runner`; `runs-on: lab` = label `lab:host` |
 | Job falla con `Unauthenticated: Missing password` | secret `SRL_PASSWORD` ausente | `Settings → Actions → Secrets` |
 | `validate` **BLOQUEADO por prerrequisitos** | etapa anterior no desplegada/verificada | mergea y verifica la etapa anterior; es la gate funcionando |
-| `promote` falla con `falta GITEA_PAT` | el secret no existe en el repo (Gitea recreada) | `make secrets` y "Volver a ejecutar todos los trabajos" |
-| `promote` falla con `API Gitea 403/401` o al hacer push | PAT sin escritura | regenera el token con *repository: Read and Write* y actualiza el secret `GITEA_PAT` |
-| `make push` dice `falta GITEA_PAT` | `gitea/.env` sin el token | añade `GITEA_PAT=<token>` a `gitea/.env` (mismo valor que el secret) |
+| `promote` falla con `falta NETOPS_PAT` | el secret no existe en el repo (o tiene otro nombre) | `make secrets` y "Volver a ejecutar todos los trabajos" |
+| `make secrets` devuelve HTTP 400 | nombre de secret reservado | los nombres no pueden empezar por `GITEA_`/`GITHUB_`; el kit usa `NETOPS_PAT` |
+| `promote` falla con `API Gitea 403/401` o al hacer push | PAT sin escritura | regenera el token con *repository: Read and Write* y actualiza el secret `NETOPS_PAT` |
+| `make push` dice `falta NETOPS_PAT` | `gitea/.env` sin el token | añade `NETOPS_PAT=<token>` a `gitea/.env` (mismo valor que el secret) |
 | `make push` abre el PR pero el plan sale BLOQUEADO | etapa anterior no desplegada | es la gate; mergea y verifica la anterior, luego `make push` de nuevo (el PR existente no se duplica) |
 | `promote` dice "la rama ya existe en el remoto" | etapa ya propuesta | nada que hacer: revisa el PR abierto |
 | `gnmic set` rechaza `mac-vrf`/`bridged` | identidad sin prefijo de módulo | `SRL_QUALIFY_IDENTITIES=1` en el entorno del runner |
 | `vrf-1` no sube o sin MACs | overlay no establecido / tráfico parado | `make status`; `make traffic-start`; `ssh admin@spine1` → `show … bgp neighbor` |
-| Job falla en *Checkout* | PAT/URL | secret `GITEA_PAT`; el runner clona por `http://localhost:3030` |
+| Job falla en *Checkout* | PAT/URL | secret `NETOPS_PAT`; el runner clona por `http://localhost:3030` |
 | Job `gnmic: not found` | PATH del servicio | `Environment=PATH=…` en el unit o `sudo ln -s $(which gnmic) /usr/local/bin/gnmic` |
 | Plan vacío ("no se pudo interpretar…") | formato de respuesta gNMI | el script imprime la salida bruta: revisa la ruta/encoding |
 | Sesión no llega a `established` | otro extremo sin configurar | `ssh admin@spine2` → `show … bgp neighbor` |

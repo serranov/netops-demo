@@ -15,7 +15,7 @@ El cuerpo del PR se genera siempre con el mismo codigo, asi que ningun PR del fl
 escribir nada a mano: "Que cambia" (etapa, descripcion, fragmento YAML), "Plan esperado"
 (salida de `netops.py --dry-run --prune` contra el nodo en el momento de abrir el PR) y checklist.
 
-Entorno para la API: GITEA_PAT (token con ESCRITURA en el repo). GITEA_URL y GITEA_REPO (owner/repo)
+Entorno para la API: NETOPS_PAT (token con ESCRITURA en el repo). GITEA_URL y GITEA_REPO (owner/repo)
 se deducen del remote `origin` si no se indican. SRL_PASSWORD para el plan (def. NokiaSrl1!).
 Salida: 0 (hecho, o nada que hacer) · 1 error.
 """
@@ -214,9 +214,9 @@ def gitea_cfg():
         owner, name = repo.split("/", 1)
     else:
         owner, name = owner_env or "", repo
-    pat = os.environ.get("GITEA_PAT") or ""
+    pat = os.environ.get("NETOPS_PAT") or os.environ.get("GITEA_PAT") or ""
     if not pat:
-        raise SystemExit("falta GITEA_PAT (token con escritura). En local: ponlo en gitea/.env del kit; en CI: secret GITEA_PAT")
+        raise SystemExit("falta NETOPS_PAT (token con escritura). En local: ponlo en gitea/.env del kit; en CI: secret NETOPS_PAT")
     if not (owner and name):
         raise SystemExit("no puedo deducir owner/repo del remote origin: define GITEA_REPO=owner/repo")
     return url.rstrip("/"), owner, name, pat

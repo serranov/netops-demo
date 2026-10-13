@@ -7,7 +7,8 @@
 #                                        crea su rama y abre el Pull Request (una persona lo revisa y mergea).
 #
 # Secrets (Settings -> Actions -> Secrets):
-#   GITEA_PAT     : token con permiso de ESCRITURA en el repositorio (clone + push de la rama + API de PRs)
+#   NETOPS_PAT    : token con permiso de ESCRITURA en el repositorio (clone + push de la rama + API de PRs).
+#                   (Gitea prohibe nombres de secret que empiecen por GITEA_ o GITHUB_.)
 #   SRL_PASSWORD  : password de admin en SR Linux (por defecto en el lab: NokiaSrl1!)
 
 name: netops
@@ -29,7 +30,7 @@ jobs:
         run: |
           rm -rf src
           git clone --quiet --depth 1 --branch "${{ github.ref_name }}" \
-            "http://${{ github.repository_owner }}:${{ secrets.GITEA_PAT }}@localhost:3030/${{ github.repository }}.git" src
+            "http://${{ github.repository_owner }}:${{ secrets.NETOPS_PAT }}@localhost:3030/${{ github.repository }}.git" src
           git -C src fetch --quiet --depth 1 origin main:refs/remotes/origin/main   # para comparar el rollout contra main
 
       - name: Lint (YAML, sintaxis, estado del rollout)
@@ -54,7 +55,7 @@ jobs:
         run: |
           rm -rf src
           git clone --quiet --depth 1 --branch main \
-            "http://${{ github.repository_owner }}:${{ secrets.GITEA_PAT }}@localhost:3030/${{ github.repository }}.git" src
+            "http://${{ github.repository_owner }}:${{ secrets.NETOPS_PAT }}@localhost:3030/${{ github.repository }}.git" src
 
       - name: Deploy (gnmic set -> SR Linux) y verificacion por etapa
         env:
@@ -79,11 +80,11 @@ jobs:
         run: |
           rm -rf src
           git clone --quiet --branch main \
-            "http://${{ github.repository_owner }}:${{ secrets.GITEA_PAT }}@localhost:3030/${{ github.repository }}.git" src
+            "http://${{ github.repository_owner }}:${{ secrets.NETOPS_PAT }}@localhost:3030/${{ github.repository }}.git" src
 
       - name: Proponer la siguiente etapa (solo si auto_promote) con su PR documentado
         env:
-          GITEA_PAT: ${{ secrets.GITEA_PAT }}
+          NETOPS_PAT: ${{ secrets.NETOPS_PAT }}
           GITEA_REPO: ${{ github.repository }}
           SRL_PASSWORD: ${{ secrets.SRL_PASSWORD }}
         run: |
