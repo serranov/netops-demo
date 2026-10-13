@@ -39,7 +39,7 @@ def initial():
 
 
 def load():
-    if not os.path.exists(STATE):
+    if not os.path.exists(STATE) or os.path.getsize(STATE) == 0:
         save(initial())
     with open(STATE) as fh:
         return json.load(fh)

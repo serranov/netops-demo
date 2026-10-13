@@ -62,13 +62,13 @@ netops-demo/
 │   └── netops-demo.json       ← dashboard "NetOps - Onboarding de leaf3" (día 0/1/2 + anotaciones de deploy)
 ├── gitea/
 │   ├── docker-compose.yml     ← Gitea en :3030 (Actions habilitado)
-│   ├── .env.example           ← VM_IP: lo que escribes en el navegador (localhost si usas túnel)
+│   ├── .env.example           ← VM_IP (lo que escribes en el navegador) y GITEA_PAT (para que make push abra el PR)
 │   └── runner-setup.sh        ← act_runner en modo host, label 'lab', servicio systemd
 ├── gitops-repo/               ← contenido inicial del repositorio GitOps `netops-gitops`
 │   ├── intent/leaf3.yml       ← la INTENCIÓN (estado base = día 0; ownership de lo que GitOps posee)
 │   ├── stages/leaf3.yml       ← el PLAN por etapas (fragmentos overlay y service, auto_promote)
 │   ├── scripts/netops.py      ← prerrequisitos + plan + apply atómico + verificación + prune
-│   ├── scripts/promote.py     ← crea la rama de la siguiente etapa y abre su PR vía API
+│   ├── scripts/promote.py     ← etapas: crea la rama siguiente y abre PRs ya documentados (descripción + plan real)
 │   ├── .gitea/workflows/netops.yml       ← rama ≠ main: validate · main: deploy + promote
 │   └── .gitea/PULL_REQUEST_TEMPLATE.md
 ├── demo/                      ← scripts del escenario
@@ -77,7 +77,7 @@ netops-demo/
 │   ├── status.sh              ← chequeo de salud
 │   └── tunnel.sh              ← (desde el portátil) túnel SSH a Grafana/Prometheus/Gitea
 └── tests/
-    ├── run.sh                 ← 27 pruebas sin laboratorio (make test)
+    ├── run.sh                 ← 31 pruebas sin laboratorio (make test)
     └── mock-gnmic/gnmic       ← mini SR Linux simulado con estado (grupos, vecinos, servicios)
 ```
 
@@ -215,6 +215,7 @@ Toda la capa GitOps corre en la VM: no depende de ningún servicio externo.
 ```bash
 cd ~/netops-demo/gitea
 cp .env.example .env                       # VM_IP = lo que escribes en el navegador: localhost (túnel), IP o DNS
+                                           # GITEA_PAT = lo rellenas en el paso 2 de abajo
 docker compose up -d && sleep 10
 # usuario de Gitea (independiente de los usuarios Linux; username/password/email son libres)
 docker exec -u git gitea gitea admin user create --admin --username <usuario> \
@@ -224,7 +225,7 @@ docker exec -u git gitea gitea admin user create --admin --username <usuario> \
 Abre `http://localhost:3030` (o la IP), entra y:
 
 1. **Nuevo repositorio** → `netops-gitops` (vacío, sin README).
-2. **Token personal**: avatar → *Settings → Applications → Generate new token* → `netops-pipeline`, permiso **repository: Read and Write** (el job `promote` empuja ramas y abre PRs por API). Cópialo.
+2. **Token personal**: avatar → *Settings → Applications → Generate new token* → `netops-pipeline`, permiso **repository: Read and Write** (sirve para que `make push` y el job `promote` abran PRs por API). Cópialo y ponlo también en `gitea/.env` como `GITEA_PAT=…`.
 3. **Secrets del repo**: `netops-gitops → Settings → Actions → Secrets`: `GITEA_PAT` = token · `SRL_PASSWORD` = `NokiaSrl1!`.
 
 ### 6.2 Runner (modo host)
@@ -267,10 +268,10 @@ Ese primer push lanza `deploy`. La intención base no declara overlay ni servici
                                                                      promote ──▶ rama etapa N+1 + PR N+1 (si auto_promote)
 ```
 
-1. Una persona inicia el rollout: `promote.py --stage overlay` (o `make prep`) crea la rama de la etapa 1; `git push` y **Pull Request**.
-2. **validate** comprueba en el nodo el prerrequisito de la etapa (día 0: underlay establecido) y publica el **plan**: `+ añadir`, `= asegurar`, `- eliminar`.
+1. Una persona inicia el rollout: `make prep` (o `promote.py --stage overlay`) crea la rama de la etapa 1; `make push` la publica **y abre el Pull Request ya documentado**: "Qué cambia" (etapa, descripción, fragmento YAML), "Plan esperado" (la salida real de `netops.py --dry-run --prune` contra el nodo en ese momento) y un checklist con los prerrequisitos y el impacto calculados. Nadie escribe PRs a mano.
+2. **validate** vuelve a comprobar en el nodo el prerrequisito de la etapa (día 0: underlay establecido) y publica el **plan** en su log: `+ añadir`, `= asegurar`, `- eliminar`.
 3. **Merge** (borrando la rama). **deploy** aplica en una transacción gNMI, espera a que las sesiones establezcan y anota el despliegue en Grafana (líneas naranjas en los paneles).
-4. **promote** ve que la etapa `service` tiene `auto_promote: true`: crea su rama con el fragmento fusionado y **abre el PR** con descripción, YAML y checklist. Una persona lo revisa.
+4. **promote** ve que la etapa `service` tiene `auto_promote: true`: crea su rama con el fragmento fusionado y **abre el PR** con el mismo generador (descripción, YAML, plan real y checklist). Una persona lo revisa.
 5. **validate** del PR 2 exige que el overlay esté `established` en el nodo (gate). **Merge** → **deploy** crea subinterfaz, vxlan-interface y mac-vrf, y verifica `oper-state up`.
 6. Deshacer: **Revert** del PR y merge → `deploy --prune` elimina lo que ya no está declarado (servicio con sus miembros, o grupo y vecinos).
 
@@ -283,7 +284,8 @@ cd ~/netops-demo
 make prep             # leaf3 a día 0 por gNMI, tráfico iperf3, rama onboarding/leaf3-10-overlay con el commit
 make status           # salud: lab, estado de leaf3, rollout, Prometheus, Grafana, Gitea, runner
 make diff             # el cambio de la etapa 1: grupo iBGP-overlay + 2 vecinos
-make push             # publica la rama → crea el PR en Gitea → validate → merge
+make pr-preview       # (opcional) el cuerpo del PR que se va a abrir
+make push             # publica la rama y abre el PR documentado → validate → merge
 #                      ... deploy aplica y verifica; promote abre el PR de la etapa 2 → validate (gate) → merge
 make rollout          # [x] overlay  [x] service
 make reset            # main ← day0 (force-push), borra las ramas de las etapas, leaf3 a día 0
@@ -324,6 +326,7 @@ Añade un caso a `tests/run.sh` por cada comportamiento nuevo (una línea `t "no
 ### 10.3 Ramas, PRs y Gitea
 
 - **Nunca se empuja a `main`**: cada etapa es una rama corta (`onboarding/<nodo>-<orden>-<etapa>`) y un PR; el PR *es* la ventana de cambio y deja registrados plan, prerrequisitos y aprobación.
+- **Los PRs se abren por API, ya documentados** (`make push` para el humano, `promote` para la máquina), con un único generador de cuerpo en `promote.py`. Así ningún cambio depende de que alguien recuerde pegar el plan. La plantilla `.gitea/PULL_REQUEST_TEMPLATE.md` solo aplica a PRs creados a mano desde la web.
 - **Una etapa por PR.** Juntar overlay y servicio en un PR funciona (el script aplica en orden y espera entre ambos), pero pierdes la gate explícita, la verificación por etapa y el rollback independiente.
 - **Promoción automática, aprobación humana.** `promote` solo crea ramas y PRs para etapas con `auto_promote: true`; nunca mergea. Es el patrón de *staged rollout* de las herramientas de CD.
 - Protege `main` (`Settings → Branches → Add rule`): sin push directo, status check **`validate`** obligatorio y, si quieres, una aprobación. `make reset` hace force-push a `main`: añade tu usuario a la lista blanca de *force push* o usa *Revert* como vuelta atrás.
@@ -361,10 +364,13 @@ Añade un caso a `tests/run.sh` por cada comportamiento nuevo (una línea `t "no
 | Grafana `running` pero :3000 no responde | plugin FlowPanel sin proxy | variables en el nodo grafana (§3) + `--node-filter grafana` |
 | Grafana paneles vacíos solo con proxy | consulta datasources vía proxy | `NO_PROXY: …,prometheus,loki` en el nodo grafana |
 | No llego a :3000/:9090 desde mi equipo | VM en red privada | `demo/tunnel.sh` (o DNAT, §2.2) |
+| Runner **Desconectado / Nunca** en Gitea | demonio con un registro antiguo (Gitea reinstalada) | `sudo systemctl restart act_runner`; si persiste, `rm ~/act_runner/.runner && make runner` |
 | Job **Waiting** | runner caído o label | `sudo systemctl status act_runner`; `runs-on: lab` = label `lab:host` |
 | Job falla con `Unauthenticated: Missing password` | secret `SRL_PASSWORD` ausente | `Settings → Actions → Secrets` |
 | `validate` **BLOQUEADO por prerrequisitos** | etapa anterior no desplegada/verificada | mergea y verifica la etapa anterior; es la gate funcionando |
-| `promote` falla con `API Gitea 403/401` o al hacer push | PAT sin escritura | regenera el token con *repository: Read and Write* y actualiza `GITEA_PAT` |
+| `promote` falla con `API Gitea 403/401` o al hacer push | PAT sin escritura | regenera el token con *repository: Read and Write* y actualiza el secret `GITEA_PAT` |
+| `make push` dice `falta GITEA_PAT` | `gitea/.env` sin el token | añade `GITEA_PAT=<token>` a `gitea/.env` (mismo valor que el secret) |
+| `make push` abre el PR pero el plan sale BLOQUEADO | etapa anterior no desplegada | es la gate; mergea y verifica la anterior, luego `make push` de nuevo (el PR existente no se duplica) |
 | `promote` dice "la rama ya existe en el remoto" | etapa ya propuesta | nada que hacer: revisa el PR abierto |
 | `gnmic set` rechaza `mac-vrf`/`bridged` | identidad sin prefijo de módulo | `SRL_QUALIFY_IDENTITIES=1` en el entorno del runner |
 | `vrf-1` no sube o sin MACs | overlay no establecido / tráfico parado | `make status`; `make traffic-start`; `ssh admin@spine1` → `show … bgp neighbor` |

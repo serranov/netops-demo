@@ -81,10 +81,11 @@ jobs:
           git clone --quiet --branch main \
             "http://${{ github.repository_owner }}:${{ secrets.GITEA_PAT }}@localhost:3030/${{ github.repository }}.git" src
 
-      - name: Proponer la siguiente etapa (solo si auto_promote)
+      - name: Proponer la siguiente etapa (solo si auto_promote) con su PR documentado
         env:
           GITEA_PAT: ${{ secrets.GITEA_PAT }}
           GITEA_REPO: ${{ github.repository }}
+          SRL_PASSWORD: ${{ secrets.SRL_PASSWORD }}
         run: |
           cd src
           python3 scripts/promote.py --node "$NODE" --next --auto --open-pr

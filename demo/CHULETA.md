@@ -20,7 +20,7 @@
 | Haz | Di |
 |---|---|
 | **Terminal B** → `make diff` | "Etapa 1, el overlay: un grupo iBGP EVPN y dos sesiones a los route reflectors. YAML, no CLI." |
-| `make push` → Gitea → *Create Pull Request* | "Abro el PR. El pipeline comprueba el **prerrequisito** (underlay establecido) y publica el plan." |
+| `make push` → Gitea → *Pull Requests* → PR #1 | "Publico la rama y el PR se abre solo, ya documentado: qué cambia, el fragmento, y el **plan calculado contra el nodo real** con el prerrequisito comprobado. Nadie ha escrito esto a mano." |
 | **Actions** → `validate` → log: `dia 0 OK`, `+ AÑADIR vecino 10.0.2.1/2` | "Lee el nodo real por gNMI. Sin tocar nada." |
 | **PR** → **Merge** (borrar rama) | "Aprobado." |
 | **Actions** → `deploy` → `OK 10.0.2.1 established` → `DEPLOY OK` | "Una transacción gNMI y espera a que establezcan. Y anota el despliegue en Grafana." |

@@ -24,7 +24,7 @@ cd "$REPO_DIR"
 git switch -q main
 git pull -q --ff-only origin main || true
 python3 scripts/promote.py --node "$NODE" --stage overlay
-c_ok "siguiente: make diff && make push  (luego crea el PR en Gitea y mergea; el PR del dia 2 se abre solo)"
+c_ok "siguiente: make diff && make push  (abre el PR ya documentado; tras el merge, el PR del dia 2 se abre solo)"
 
 OWNER="$(repo_owner)"; NAME="$(repo_name)"
 c_hdr "URLs (con el tunel SSH abierto, o sustituye localhost por la IP de la VM)"

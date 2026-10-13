@@ -84,6 +84,15 @@ t "next --auto tras overlay: propone service"                 "rama onboarding/l
 git -C "$REPO" switch -q main && git -C "$REPO" merge -q --ff-only onboarding/leaf3-20-service-vrf1
 t "rollout completo"                                          "rollout completo"                                     promote --node leaf3 --next
 
+echo "== promote.py --pr --print (cuerpo del PR generado, con plan real del mock)"
+git -C "$REPO" switch -q main && git -C "$REPO" reset -q --hard "$(git -C "$REPO" rev-list --max-parents=0 HEAD)"
+git -C "$REPO" branch -D onboarding/leaf3-10-overlay onboarding/leaf3-20-service-vrf1 >/dev/null 2>&1 || true
+reset_mock; MOCK_START=day0 promote --node leaf3 --stage overlay >/dev/null
+MOCK_START=day0 t "cuerpo: seccion Que cambia desde la etapa"   "Etapa.*overlay.*order 10"                         promote --node leaf3 --pr --print
+MOCK_START=day0 t "cuerpo: plan real con las altas del overlay" "\+ AÑADIR +vecino 10\.0\.2\.2"                    promote --node leaf3 --pr --print
+MOCK_START=day0 t "cuerpo: checklist con impacto calculado"     "\[x\] Impacto: 3 alta\(s\), 0 baja\(s\)"         promote --node leaf3 --pr --print
+t "pr sin GITEA_PAT: error claro (rc=1)"                        "falta GITEA_PAT" --rc 1                            env -u GITEA_PAT python3 "$REPO/scripts/promote.py" --node leaf3 --pr
+
 echo "== validacion estatica"
 t "py_compile"  "^$" python3 -m py_compile "$REPO/scripts/netops.py" "$REPO/scripts/promote.py"
 t "YAML del kit" "YAML OK" python3 -c "import yaml,sys; [yaml.safe_load(open(f)) for f in sys.argv[1:]]; print('YAML OK')" \

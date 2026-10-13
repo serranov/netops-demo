@@ -1,15 +1,17 @@
+<!--
+Los PRs del flujo (make push, job promote) se crean ya documentados por scripts/promote.py.
+Esta plantilla solo aplica a PRs creados a mano desde la web de Gitea.
+-->
 ## Qué cambia
-
-<!-- Etapa del rollout (overlay / service / otra), nodo afectado y motivo (ticket, ventana) -->
 
 ## Plan esperado
 
-<!-- Pega el bloque "-- Prerrequisitos" y "-- Plan" del job `validate` -->
+Pega el bloque "-- Prerrequisitos" y "-- Plan" del job `validate` (o ejecuta `python3 scripts/promote.py --node leaf3 --pr --print` en la rama).
 
 ## Checklist
 
-- [ ] `validate` en verde: prerrequisitos OK y plan exactamente el esperado (sin eliminaciones inesperadas)
-- [ ] Dependencias: la etapa anterior está desplegada y verificada en el nodo
-- [ ] Impacto conocido: ¿afecta a tráfico en producción? ¿hay ventana?
-- [ ] Observación tras el merge: anotación de deploy en Grafana y paneles de la etapa en verde
-- [ ] Rollback: Revert del PR y merge (el pipeline elimina lo que deja de estar declarado)
+- [ ] Prerrequisitos de la etapa comprobados en el nodo
+- [ ] Impacto conocido (altas/bajas, nodos afectados)
+- [ ] `validate` en verde en el último commit
+- [ ] Tras el merge: `deploy` en verde, anotación en Grafana y paneles de la etapa en verde
+- [x] Rollback disponible: Revert del PR y merge

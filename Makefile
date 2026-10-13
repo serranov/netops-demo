@@ -5,7 +5,7 @@ NODE     ?= leaf3
 export LAB_DIR REPO_DIR NODE
 
 .PHONY: help install patch lab-up lab-down gitea-up gitea-down runner traffic-start traffic-stop \
-        prep diff push promote rollout status reset test
+        prep diff push pr-preview promote rollout status reset test
 
 help:
 	@echo "Instalacion y laboratorio"
@@ -22,7 +22,8 @@ help:
 	@echo "Escenario: onboarding de leaf3 (dia 0 -> overlay -> servicio)"
 	@echo "  make prep           - leaf3 a dia 0 + trafico + rama de la etapa 'overlay' (commit local)"
 	@echo "  make diff           - diff de la intencion en la rama actual frente a main"
-	@echo "  make push           - publica la rama actual en Gitea (abre el PR desde la web)"
+	@echo "  make push           - publica la rama actual y ABRE el PR en Gitea ya documentado (descripcion + plan real)"
+	@echo "  make pr-preview     - muestra el cuerpo del PR que generaria make push (sin abrirlo)"
 	@echo "  make promote        - crea localmente la rama de la siguiente etapa pendiente (si no la abrio el pipeline)"
 	@echo "  make rollout        - estado del rollout (etapas aplicadas / pendientes)"
 	@echo "  make status         - chequeo de salud de todo"
@@ -41,7 +42,8 @@ gitea-down:     ; cd gitea && docker compose down
 runner:         ; bash gitea/runner-setup.sh
 prep:           ; bash demo/prep.sh
 diff:           ; cd $(REPO_DIR) && git --no-pager diff main..HEAD -- intent/
-push:           ; cd $(REPO_DIR) && git push -u origin "$$(git branch --show-current)"
+push:           ; cd $(REPO_DIR) && git push -u origin "$$(git branch --show-current)" && set -a && . $(CURDIR)/gitea/.env && set +a && python3 scripts/promote.py --node $(NODE) --pr
+pr-preview:     ; cd $(REPO_DIR) && python3 scripts/promote.py --node $(NODE) --pr --print
 promote:        ; cd $(REPO_DIR) && python3 scripts/promote.py --node $(NODE) --next
 rollout:        ; cd $(REPO_DIR) && python3 scripts/promote.py --node $(NODE) --list
 status:         ; bash demo/status.sh
