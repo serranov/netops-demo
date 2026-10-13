@@ -13,13 +13,13 @@ help:
 	@echo "  make patch          - clona srl-telemetry-lab, aplica los parches y pre-descarga sus imagenes"
 	@echo "  make lab-up         - containerlab deploy (fabric + telemetria)"
 	@echo "  make lab-down       - containerlab destroy"
-	@echo "  make traffic-start  - iperf3 entre clientes (anima los dashboards)"
+	@echo "  make traffic-start  - iperf3 entre clientes en lazo resiliente (el trafico aparece solo cuando hay camino)"
 	@echo "  make traffic-stop   - detiene el trafico"
 	@echo "Capa GitOps"
 	@echo "  make gitea-up       - Gitea en :3030 (necesita gitea/.env)"
 	@echo "  make gitea-down     - detiene Gitea"
 	@echo "  make runner         - instala/registra act_runner en modo host (label 'lab')"
-	@echo "  make secrets        - crea los secrets GITEA_PAT y SRL_PASSWORD del repo GitOps por API (desde gitea/.env)"
+	@echo "  make secrets        - crea los secrets NETOPS_PAT y SRL_PASSWORD del repo GitOps por API (desde gitea/.env)"
 	@echo "Escenario: onboarding de leaf3 (dia 0 -> overlay -> servicio)"
 	@echo "  make prep           - leaf3 a dia 0 + trafico + rama de la etapa 'overlay' (commit local)"
 	@echo "  make diff           - diff de la intencion en la rama actual frente a main"
@@ -36,8 +36,8 @@ install:        ; bash setup/install-vm.sh
 patch:          ; bash setup/patch-lab.sh
 lab-up:         ; cd $(LAB_DIR) && sudo containerlab deploy -t st.clab.yml --reconfigure
 lab-down:       ; cd $(LAB_DIR) && sudo containerlab destroy -t st.clab.yml --cleanup
-traffic-start:  ; cd $(LAB_DIR) && bash traffic.sh start all
-traffic-stop:   ; cd $(LAB_DIR) && bash traffic.sh stop all
+traffic-start:  ; bash demo/traffic.sh start
+traffic-stop:   ; bash demo/traffic.sh stop
 gitea-up:       ; cd gitea && docker compose up -d
 gitea-down:     ; cd gitea && docker compose down
 runner:         ; bash gitea/runner-setup.sh

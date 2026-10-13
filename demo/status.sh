@@ -13,6 +13,9 @@ node_show 2>/dev/null | sed -n '/Estado actual/,$p' || c_warn "gnmic no responde
 c_hdr "Rollout (stages/$NODE.yml vs main)"
 ( cd "$REPO_DIR" && python3 scripts/promote.py --node "$NODE" --list ) 2>/dev/null || c_warn "no se pudo leer el rollout"
 
+c_hdr "Trafico entre clientes"
+bash "$KIT_DIR/demo/traffic.sh" status
+
 c_hdr "Prometheus: sesiones BGP de leaf3 (ultimo valor)"
 curl -s 'http://localhost:9090/api/v1/query' --data-urlencode \
   'query=network_instance_protocols_bgp_neighbor_session_state{source="leaf3"}' \
