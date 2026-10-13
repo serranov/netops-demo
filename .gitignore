@@ -1,4 +1,7 @@
+# entorno local
 gitea/.env
 gitea/data/
 __pycache__/
 *.pyc
+# artefactos generados de las slides (se regeneran con make slides)
+slides/dist/

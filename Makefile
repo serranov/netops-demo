@@ -5,7 +5,15 @@ NODE     ?= leaf3
 export LAB_DIR REPO_DIR NODE
 
 .PHONY: help install patch lab-up lab-down gitea-up gitea-down runner traffic-start traffic-stop \
-        prep diff push pr-preview promote rollout status reset test secrets
+        prep diff push pr-preview promote rollout status reset test secrets \
+        slides slides-pdf slides-pptx slides-all slides-watch
+
+# ---- Slides (Marp). Por defecto, imagen Docker oficial (incluye Chromium para PDF/PPTX).
+# Sin Docker: make slides MARP="npx -y @marp-team/marp-cli@latest"   (Node >= 18; PDF/PPTX necesitan un navegador)
+SLIDES_DIR = slides
+SLIDES_MD  = redes-como-codigo
+MARP      ?= docker run --rm --init -v "$(CURDIR)/$(SLIDES_DIR):/home/marp/app" -e LANG=C.UTF-8 -e MARP_USER="$$(id -u):$$(id -g)" marpteam/marp-cli:latest
+MARP_SRV  ?= docker run --rm --init -it -v "$(CURDIR)/$(SLIDES_DIR):/home/marp/app" -e LANG=C.UTF-8 -p 8080:8080 -p 37717:37717 marpteam/marp-cli:latest
 
 help:
 	@echo "Instalacion y laboratorio"
@@ -31,6 +39,12 @@ help:
 	@echo "  make reset          - vuelve a dia 0 (repo y nodo) para repetir"
 	@echo "Desarrollo"
 	@echo "  make test           - pruebas de netops.py y promote.py con gnmic simulado + validacion estatica"
+	@echo "Slides (Marp, slides/redes-como-codigo.md -> slides/dist/)"
+	@echo "  make slides         - HTML autocontenido"
+	@echo "  make slides-pdf     - PDF"
+	@echo "  make slides-pptx    - PPTX con notas de orador"
+	@echo "  make slides-all     - HTML + PDF + PPTX"
+	@echo "  make slides-watch   - servidor con recarga en caliente en http://localhost:8080"
 
 install:        ; bash setup/install-vm.sh
 patch:          ; bash setup/patch-lab.sh
@@ -51,3 +65,9 @@ rollout:        ; cd $(REPO_DIR) && python3 scripts/promote.py --node $(NODE) --
 status:         ; bash demo/status.sh
 reset:          ; bash demo/reset.sh
 test:           ; bash tests/run.sh
+
+slides:         ; mkdir -p $(SLIDES_DIR)/dist && cd $(SLIDES_DIR) && $(MARP) $(SLIDES_MD).md --html --allow-local-files -o dist/$(SLIDES_MD).html && echo "-> $(SLIDES_DIR)/dist/$(SLIDES_MD).html"
+slides-pdf:     ; mkdir -p $(SLIDES_DIR)/dist && cd $(SLIDES_DIR) && $(MARP) $(SLIDES_MD).md --html --allow-local-files --pdf -o dist/$(SLIDES_MD).pdf && echo "-> $(SLIDES_DIR)/dist/$(SLIDES_MD).pdf"
+slides-pptx:    ; mkdir -p $(SLIDES_DIR)/dist && cd $(SLIDES_DIR) && $(MARP) $(SLIDES_MD).md --html --allow-local-files --pptx -o dist/$(SLIDES_MD).pptx && echo "-> $(SLIDES_DIR)/dist/$(SLIDES_MD).pptx"
+slides-all:     slides slides-pdf slides-pptx
+slides-watch:   ; cd $(SLIDES_DIR) && $(MARP_SRV) -s --html --allow-local-files .

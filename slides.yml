@@ -1,0 +1,37 @@
+# OPCIONAL: publica las slides en GitHub Pages en cada push que toque slides/.
+# Requisito previo (una vez): Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+# Si no quieres Pages, borra este fichero: sin Pages habilitado el job 'deploy' falla.
+name: slides
+on:
+  push:
+    branches: [main]
+    paths: ["slides/**", ".github/workflows/slides.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build HTML + PDF con marp-cli (Docker)
+        run: |
+          mkdir -p slides/dist
+          docker run --rm --init -v "$PWD/slides:/home/marp/app" -e LANG=C.UTF-8 marpteam/marp-cli:latest \
+            redes-como-codigo.md --html --allow-local-files -o dist/index.html
+          docker run --rm --init -v "$PWD/slides:/home/marp/app" -e LANG=C.UTF-8 marpteam/marp-cli:latest \
+            redes-como-codigo.md --html --allow-local-files --pdf -o dist/redes-como-codigo.pdf
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: slides/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
