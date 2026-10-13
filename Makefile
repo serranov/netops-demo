@@ -5,7 +5,7 @@ NODE     ?= leaf3
 export LAB_DIR REPO_DIR NODE
 
 .PHONY: help install patch lab-up lab-down gitea-up gitea-down runner traffic-start traffic-stop \
-        prep diff push pr-preview promote rollout status reset test
+        prep diff push pr-preview promote rollout status reset test secrets
 
 help:
 	@echo "Instalacion y laboratorio"
@@ -19,6 +19,7 @@ help:
 	@echo "  make gitea-up       - Gitea en :3030 (necesita gitea/.env)"
 	@echo "  make gitea-down     - detiene Gitea"
 	@echo "  make runner         - instala/registra act_runner en modo host (label 'lab')"
+	@echo "  make secrets        - crea los secrets GITEA_PAT y SRL_PASSWORD del repo GitOps por API (desde gitea/.env)"
 	@echo "Escenario: onboarding de leaf3 (dia 0 -> overlay -> servicio)"
 	@echo "  make prep           - leaf3 a dia 0 + trafico + rama de la etapa 'overlay' (commit local)"
 	@echo "  make diff           - diff de la intencion en la rama actual frente a main"
@@ -40,6 +41,7 @@ traffic-stop:   ; cd $(LAB_DIR) && bash traffic.sh stop all
 gitea-up:       ; cd gitea && docker compose up -d
 gitea-down:     ; cd gitea && docker compose down
 runner:         ; bash gitea/runner-setup.sh
+secrets:        ; bash demo/secrets.sh
 prep:           ; bash demo/prep.sh
 diff:           ; cd $(REPO_DIR) && git --no-pager diff main..HEAD -- intent/
 push:           ; cd $(REPO_DIR) && git push -u origin "$$(git branch --show-current)" && set -a && . $(CURDIR)/gitea/.env && set +a && python3 scripts/promote.py --node $(NODE) --pr

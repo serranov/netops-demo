@@ -74,7 +74,8 @@ netops-demo/
 ├── demo/                      ← scripts del escenario
 │   ├── prep.sh                ← leaf3 a día 0 + tráfico + rama de la etapa 'overlay'
 │   ├── reset.sh               ← vuelve a día 0 (repo y nodo)
-│   ├── status.sh              ← chequeo de salud
+│   ├── status.sh              ← chequeo de salud (incluye secrets del pipeline)
+│   ├── secrets.sh             ← crea los secrets del repo GitOps por API desde gitea/.env
 │   └── tunnel.sh              ← (desde el portátil) túnel SSH a Grafana/Prometheus/Gitea
 └── tests/
     ├── run.sh                 ← 31 pruebas sin laboratorio (make test)
@@ -226,7 +227,7 @@ Abre `http://localhost:3030` (o la IP), entra y:
 
 1. **Nuevo repositorio** → `netops-gitops` (vacío, sin README).
 2. **Token personal**: avatar → *Settings → Applications → Generate new token* → `netops-pipeline`, permiso **repository: Read and Write** (sirve para que `make push` y el job `promote` abran PRs por API). Cópialo y ponlo también en `gitea/.env` como `GITEA_PAT=…`.
-3. **Secrets del repo**: `netops-gitops → Settings → Actions → Secrets`: `GITEA_PAT` = token · `SRL_PASSWORD` = `NokiaSrl1!`.
+3. **Secrets del repo** (los lee el pipeline; no confundir con `gitea/.env`, que solo lo usa tu shell): una vez creado el repositorio y configurado el remote del paso §7, ejecuta `make secrets`, que crea `GITEA_PAT` y `SRL_PASSWORD` por API a partir de `gitea/.env`. (A mano: `netops-gitops → Settings → Actions → Secrets`.) `make status` avisa si faltan.
 
 ### 6.2 Runner (modo host)
 
@@ -251,6 +252,7 @@ git tag day0                                           # ← estado base al que 
 git remote add origin http://<usuario>@localhost:3030/<usuario>/netops-gitops.git
 git config credential.helper store                     # guarda el password/PAT tras el primer push
 git push -u origin main --tags
+cd ~/netops-demo && make secrets                       # secrets del pipeline (GITEA_PAT, SRL_PASSWORD) por API
 ```
 
 Ese primer push lanza `deploy`. La intención base no declara overlay ni servicio pero **los posee** (`ownership`), y el job usa `--prune`: **los elimina de leaf3** (que el lab arranca completo). A partir de aquí el repositorio manda y leaf3 está en día 0. *Actions* debe terminar en verde con `DEPLOY OK`; el job `promote` dirá que la siguiente etapa no es automática.
@@ -368,6 +370,7 @@ Añade un caso a `tests/run.sh` por cada comportamiento nuevo (una línea `t "no
 | Job **Waiting** | runner caído o label | `sudo systemctl status act_runner`; `runs-on: lab` = label `lab:host` |
 | Job falla con `Unauthenticated: Missing password` | secret `SRL_PASSWORD` ausente | `Settings → Actions → Secrets` |
 | `validate` **BLOQUEADO por prerrequisitos** | etapa anterior no desplegada/verificada | mergea y verifica la etapa anterior; es la gate funcionando |
+| `promote` falla con `falta GITEA_PAT` | el secret no existe en el repo (Gitea recreada) | `make secrets` y "Volver a ejecutar todos los trabajos" |
 | `promote` falla con `API Gitea 403/401` o al hacer push | PAT sin escritura | regenera el token con *repository: Read and Write* y actualiza el secret `GITEA_PAT` |
 | `make push` dice `falta GITEA_PAT` | `gitea/.env` sin el token | añade `GITEA_PAT=<token>` a `gitea/.env` (mismo valor que el secret) |
 | `make push` abre el PR pero el plan sale BLOQUEADO | etapa anterior no desplegada | es la gate; mergea y verifica la anterior, luego `make push` de nuevo (el PR existente no se duplica) |

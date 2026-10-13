@@ -26,6 +26,18 @@ code="$(curl -s -o /dev/null -w '%{http_code}' localhost:3000/api/health || true
 c_hdr "Gitea y runner"
 if dk ps --format '{{.Names}}' | grep -qx gitea; then c_ok "  gitea: $(dk ps --filter name='^gitea$' --format '{{.Status}}')"; else c_warn "  gitea no corre (make gitea-up)"; fi
 systemctl is-active act_runner >/dev/null 2>&1 && c_ok "  act_runner: active" || c_warn "  act_runner: NO activo (sudo systemctl start act_runner)"
+if [[ -f "$KIT_DIR/gitea/.env" ]]; then
+  set -a; source "$KIT_DIR/gitea/.env"; set +a
+  if [[ -n "${GITEA_PAT:-}" ]]; then
+    names="$(curl -s -H "Authorization: token ${GITEA_PAT}" "http://localhost:3030/api/v1/repos/$(repo_owner)/$(repo_name)/actions/secrets" \
+      | python3 -c 'import sys,json; d=json.load(sys.stdin); print(" ".join(sorted(x["name"] for x in d)) if isinstance(d,list) else "")' 2>/dev/null || true)"
+    for sname in GITEA_PAT SRL_PASSWORD; do
+      grep -qw "$sname" <<< "$names" && c_ok "  secret $sname: definido" || c_warn "  secret $sname: FALTA en el repo (make secrets)"
+    done
+  else
+    c_warn "  GITEA_PAT vacio en gitea/.env: make push y make secrets no funcionaran"
+  fi
+fi
 
 c_hdr "Repo GitOps"
 ( cd "$REPO_DIR" && echo "  rama: $(git branch --show-current)  |  ultimo commit: $(git log -1 --pretty=%s)" ) || c_warn "  no existe $REPO_DIR"
