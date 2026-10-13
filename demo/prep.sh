@@ -22,7 +22,7 @@ c_ok "client3 reintenta cada 3 s: leaf3 e1-1 pasara de 0 a ~1,6 Mb/s solo, en cu
 c_hdr "3/3 Repo GitOps: rama de la etapa 'overlay'"
 cd "$REPO_DIR"
 git switch -q main
-git pull -q --ff-only origin main || true
+git fetch -q origin && git reset -q --hard origin/main     # main local = main remoto (los merges se hacen en Gitea)
 python3 scripts/promote.py --node "$NODE" --stage overlay
 c_ok "siguiente: make diff && make push  (abre el PR ya documentado; tras el merge, el PR del dia 2 se abre solo)"
 

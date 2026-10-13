@@ -73,9 +73,10 @@ netops-demo/
 │   └── .gitea/PULL_REQUEST_TEMPLATE.md
 ├── demo/                      ← scripts del escenario
 │   ├── prep.sh                ← leaf3 a día 0 + tráfico + rama de la etapa 'overlay'
-│   ├── reset.sh               ← vuelve a día 0 (repo y nodo)
+│   ├── reset.sh               ← vuelve a día 0 con un commit en main (sin force-push)
 │   ├── status.sh              ← chequeo de salud (incluye secrets del pipeline)
 │   ├── secrets.sh             ← crea los secrets del repo GitOps por API desde gitea/.env
+│   ├── traffic.sh             ← iperf3 entre clientes en lazo resiliente (aparece solo cuando hay camino)
 │   └── tunnel.sh              ← (desde el portátil) túnel SSH a Grafana/Prometheus/Gitea
 └── tests/
     ├── run.sh                 ← 31 pruebas sin laboratorio (make test)
@@ -248,7 +249,7 @@ Desde **dentro de la VM** el remote es `localhost:3030` (no depende de túneles 
 ```bash
 cp -r ~/netops-demo/gitops-repo ~/netops-gitops && cd ~/netops-gitops
 git init -b main && git add -A && git commit -m "leaf3: día 0 (solo underlay, ownership de overlay y servicio)"
-git tag day0                                           # ← estado base al que vuelve `make reset`
+git tag day0                                           # ← intención de día 0 que restaura `make reset`
 git remote add origin http://<usuario>@localhost:3030/<usuario>/netops-gitops.git
 git config credential.helper store                     # guarda el password/PAT tras el primer push
 git push -u origin main --tags
@@ -283,14 +284,14 @@ Ese primer push lanza `deploy`. La intención base no declara overlay ni servici
 
 ```bash
 cd ~/netops-demo
-make prep             # leaf3 a día 0 por gNMI, tráfico iperf3, rama onboarding/leaf3-10-overlay con el commit
+make prep             # leaf3 a día 0 por gNMI, tráfico iperf3 en lazo resiliente, rama onboarding/leaf3-10-overlay con el commit
 make status           # salud: lab, estado de leaf3, rollout, Prometheus, Grafana, Gitea, runner
 make diff             # el cambio de la etapa 1: grupo iBGP-overlay + 2 vecinos
 make pr-preview       # (opcional) el cuerpo del PR que se va a abrir
 make push             # publica la rama y abre el PR documentado → validate → merge
 #                      ... deploy aplica y verifica; promote abre el PR de la etapa 2 → validate (gate) → merge
-make rollout          # [x] overlay  [x] service
-make reset            # main ← day0 (force-push), borra las ramas de las etapas, leaf3 a día 0
+make rollout          # [x] overlay  [x] service   (siempre respecto a origin/main)
+make reset            # commit 'vuelta a día 0' en main (deploy desmonta overlay y servicio), borra las ramas, leaf3 a día 0
 ```
 
 Qué observar en `http://localhost:3000/d/netops-demo`: tras el PR 1, *Día 1* pasa de 0 a **2** y aparece la anotación del deploy; tras el PR 2, *vrf-1* pasa de AUSENTE a **UP** en leaf3, suben las MACs activas y **leaf3 e1-1** empieza a llevar el tráfico de `client3` (también en el weathermap del dashboard del lab).
@@ -331,7 +332,7 @@ Añade un caso a `tests/run.sh` por cada comportamiento nuevo (una línea `t "no
 - **Los PRs se abren por API, ya documentados** (`make push` para el humano, `promote` para la máquina), con un único generador de cuerpo en `promote.py`. Así ningún cambio depende de que alguien recuerde pegar el plan. La plantilla `.gitea/PULL_REQUEST_TEMPLATE.md` solo aplica a PRs creados a mano desde la web.
 - **Una etapa por PR.** Juntar overlay y servicio en un PR funciona (el script aplica en orden y espera entre ambos), pero pierdes la gate explícita, la verificación por etapa y el rollback independiente.
 - **Promoción automática, aprobación humana.** `promote` solo crea ramas y PRs para etapas con `auto_promote: true`; nunca mergea. Es el patrón de *staged rollout* de las herramientas de CD.
-- Protege `main` (`Settings → Branches → Add rule`): sin push directo, status check **`validate`** obligatorio y, si quieres, una aprobación. `make reset` hace force-push a `main`: añade tu usuario a la lista blanca de *force push* o usa *Revert* como vuelta atrás.
+- Protege `main` (`Settings → Branches → Add rule`): sin push directo, status check **`validate`** obligatorio y, si quieres, una aprobación. `make reset` no reescribe historia: publica un commit normal que restaura la intención de día 0 (si bloqueas el push directo, haz ese commit vía PR o añade tu usuario a la lista blanca).
 - Al mergear, **borra la rama** (casilla del diálogo, o por defecto en *Settings → Repository → Pull Requests*). Estrategia *merge commit* o *squash*, no *rebase* con checks obligatorios.
 - Mensajes de commit en imperativo y con el nodo y la etapa: `leaf3: dia 1 - sesiones iBGP EVPN de overlay`.
 - Tags para hitos del estado de la red (`day0`, `leaf3-onboarded`): checkout del tag + merge a `main` es un rollback completo.
@@ -347,7 +348,7 @@ Añade un caso a `tests/run.sh` por cada comportamiento nuevo (una línea `t "no
 - Un nodo por fichero de intención y un tipo de servicio (mac-vrf L2 con una vxlan-interface). Añadir ip-vrf, varios VNIs o políticas implica un renderizador por recurso y sus casos de prueba.
 - Las identidades YANG se envían sin prefijo de módulo (`mac-vrf`, `bridged`). Si tu versión de SR Linux las rechaza, exporta `SRL_QUALIFY_IDENTITIES=1` en el runner (`Environment=` del unit) para enviarlas cualificadas.
 - La verificación de servicio comprueba `oper-state` y muestra las MACs activas; no lanza tráfico de prueba. Un test de alcance (ping entre clientes) sería el siguiente check natural.
-- Dos repositorios: el kit (este) y `netops-gitops`. Un cambio en `gitops-repo/` hay que replicarlo en `~/netops-gitops` y, si usas `make reset`, mover el tag (`git tag -f day0 && git push -f origin day0`).
+- Dos repositorios: el kit (este) y `netops-gitops`. Un cambio en `gitops-repo/` hay que replicarlo en `~/netops-gitops` con un commit en `main`. El tag `day0` solo marca la intención base que restaura `make reset`; no hace falta moverlo al cambiar scripts o workflow.
 
 ---
 
@@ -378,6 +379,7 @@ Añade un caso a `tests/run.sh` por cada comportamiento nuevo (una línea `t "no
 | `promote` dice "la rama ya existe en el remoto" | etapa ya propuesta | nada que hacer: revisa el PR abierto |
 | `gnmic set` rechaza `mac-vrf`/`bridged` | identidad sin prefijo de módulo | `SRL_QUALIFY_IDENTITIES=1` en el entorno del runner |
 | `vrf-1` no sube o sin MACs | overlay no establecido / tráfico parado | `make status`; `make traffic-start`; `ssh admin@spine1` → `show … bgp neighbor` |
+| `vrf-1` UP y MACs remotas, pero leaf3 e1-1 sin tráfico | el iperf3 de client3 murió cuando no había camino (lanzado con el `traffic.sh` del lab) | `make traffic-start` (lazo resiliente del kit); verifica con `docker exec client3 ping -c 3 2002::172:17:0:1` |
 | Job falla en *Checkout* | PAT/URL | secret `NETOPS_PAT`; el runner clona por `http://localhost:3030` |
 | Job `gnmic: not found` | PATH del servicio | `Environment=PATH=…` en el unit o `sudo ln -s $(which gnmic) /usr/local/bin/gnmic` |
 | Plan vacío ("no se pudo interpretar…") | formato de respuesta gNMI | el script imprime la salida bruta: revisa la ruta/encoding |
@@ -385,4 +387,4 @@ Añade un caso a `tests/run.sh` por cada comportamiento nuevo (una línea `t "no
 | `make status` dice que Gitea no corre | `docker ps` sin permisos | relogin; los scripts ya hacen fallback a `sudo docker` |
 | Dashboard: panel de MACs o tráfico vacío | nombre de métrica distinto en tu versión de gNMIc | Prometheus `/graph` → busca `bridge_table` / `traffic_rate` y ajusta la expresión |
 | `git push` a GitHub pide password y falla | GitHub exige token | `gh auth login` o PAT + `credential.helper store` |
-| `make reset` falla al hacer push | `main` protegida | lista blanca de force-push o desproteger temporalmente |
+| `make reset` falla al hacer push | `main` protegida contra push directo | añade tu usuario a la lista blanca o haz el commit de vuelta a día 0 vía PR |

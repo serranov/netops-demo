@@ -89,15 +89,24 @@ def contains(base, frag):
 
 
 # =============================================================================== etapas
+def base_ref():
+    """La referencia del rollout es lo que hay en main del REMOTO (origin/main) si existe; si no, main local."""
+    if git("remote", "get-url", "origin", check=False):
+        git("fetch", "-q", "origin", "main", check=False)
+        if git("rev-parse", "--verify", "--quiet", "origin/main", check=False):
+            return "origin/main"
+    return "main"
+
+
 def load(node):
     stages_file = ROOT / "stages" / f"{node}.yml"
     intent_file = ROOT / "intent" / f"{node}.yml"
     if not stages_file.exists():
         raise SystemExit(f"no existe {stages_file}")
     stages = yaml.safe_load(stages_file.read_text()) or {}
-    # la referencia es SIEMPRE lo que hay en main (no el arbol de trabajo, que puede estar en otra rama)
-    main_intent = git("show", f"main:intent/{node}.yml", check=False) \
-        or git("show", f"origin/main:intent/{node}.yml", check=False)
+    # la referencia es SIEMPRE main (remoto si existe), no el arbol de trabajo, que puede estar en otra rama
+    ref = base_ref()
+    main_intent = git("show", f"{ref}:intent/{node}.yml", check=False)
     intent = yaml.safe_load(main_intent or intent_file.read_text()) or {}
     st = sorted(stages.get("stages", []), key=lambda s: s.get("order", 0))
     return st, intent, intent_file
@@ -135,7 +144,7 @@ def create_branch(stage, intent, intent_file):
         log(f"   la rama {branch} ya existe localmente: etapa ya propuesta (git switch {branch} para verla)")
         git("switch", "-q", branch)
         return branch
-    git("switch", "-q", "-c", branch, "main")
+    git("switch", "-q", "-c", branch, base_ref())
     merged = deep_merge(intent, stage.get("intent", {}))
     write_intent(intent_file, merged, stage)
     git("add", str(intent_file.relative_to(ROOT)))
