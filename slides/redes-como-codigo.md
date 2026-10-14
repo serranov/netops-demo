@@ -318,9 +318,10 @@ Diferentes propuestas de "IA agéntica para operar la red" se apoyan en los tres
 
 <div class="kick cyan">Conclusiones</div>
 
-# Sense · Think · Act
+# Redes Autónomas - AIOps
 
-<!-- Diagrama "Networks that sense, think and act" (recreado como SVG a partir de la slide 3 de Automation.pptx) -->
+## Redes que sienten, piensan y actúan
+
 <svg viewBox="0 0 760 350" width="760" height="350" style="display:block;margin:0 auto" font-family="Calibri, 'Segoe UI', Arial, sans-serif">
   <defs>
     <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#fff"/></marker>
@@ -384,8 +385,7 @@ Diferentes propuestas de "IA agéntica para operar la red" se apoyan en los tres
   <text x="48" y="311" font-size="15" fill="#fff">Librerías</text>
   <path d="M88 262 C 128 262, 122 238, 108 214" fill="none" stroke="#fff" stroke-width="2" marker-end="url(#ar)"/>
 </svg>
-<p style="font-size:24px;font-weight:800;margin-top:14px">Código + telemetría + GitOps = bucle cerrado funcional.</p>
-<p class="cyan" style="font-size:20px;font-style:italic">La red pasa a integrarse en el pipeline del negocio.</p>
+<p class="cyan" style="font-size:20px;font-style:italic;margin-top:18px">Código + GitOps + telemetría = bucle cerrado funcional.</p>
 
 <!--
 [24:00 · 1 min] Sense/think/act = telemetría / validación / deploy. Tres pilares, un bucle cerrado. Y todo sobre un Proxmox modesto, sin licencias.
