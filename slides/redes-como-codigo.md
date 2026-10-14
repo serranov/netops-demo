@@ -316,7 +316,7 @@ Diferentes propuestas de "IA agéntica para operar la red" se apoyan en los tres
 
 <!-- _class: dark -->
 
-<div class="kick cyan">Conclusiones</div>
+<div class="kick cyan">Bloque 4 · El futuro</div>
 
 # Redes Autónomas - AIOps
 
@@ -385,7 +385,7 @@ Diferentes propuestas de "IA agéntica para operar la red" se apoyan en los tres
   <text x="48" y="311" font-size="15" fill="#fff">Librerías</text>
   <path d="M88 262 C 128 262, 122 238, 108 214" fill="none" stroke="#fff" stroke-width="2" marker-end="url(#ar)"/>
 </svg>
-<p class="cyan" style="font-size:20px;font-style:italic;margin-top:18px">Código + GitOps + telemetría = bucle cerrado funcional.</p>
+<p class="cyan" style="text-align:center;font-size:20px;font-style:italic;margin-top:18px">Código + GitOps + telemetría = bucle cerrado funcional.</p>
 
 <!--
 [24:00 · 1 min] Sense/think/act = telemetría / validación / deploy. Tres pilares, un bucle cerrado. Y todo sobre un Proxmox modesto, sin licencias.
