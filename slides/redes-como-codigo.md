@@ -115,6 +115,7 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 
 <!--
 [0:30 · 2 min] Escalera de TM Forum. La mayoría de redes de producción siguen en L0/L1: cambios por CLI, monitorización por SNMP. Las apps llevan años en L3. Hoy subimos la red a L2/L3 con herramientas libres; la IA (L4/L5) la dejamos para el final.
+Gancho de actualidad: en el OCP Global Summit 2026 (San José, 12-15 oct) la palabra de las keynotes fue "agentic" (AMD, Arm, NVIDIA: "infraestructura abierta para la IA agéntica"). Pero si bajas a las salas de redes y al SONiC Workshop, de lo que se habla es de gNMI, YANG, emulación y validación: los peldaños L2-L3 de esta escalera. Nadie salta a L5 sin pasar por aquí.
 -->
 
 ---
@@ -124,9 +125,9 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 # Lo que cuesta hacerlo a mano
 
 <div class="row">
-  <div class="card"><span class="num" style="background:#E4007A">!</span><h3 style="margin-top:12px">¿Quién cambió qué?</h3><p class="mute">Sin trazabilidad: los cambios son texto no estructurado que se aplican manualmente por CLI / SSH y nadie los firma.</p></div>
-  <div class="card"><span class="num" style="background:#F5A524">!</span><h3 style="margin-top:12px">Rollback = volver a teclear</h3><p class="mute">Los cambios se aplican a ciegas, sin validación previa, y no hay un estado autoritativo al que regresar.</p></div>
-  <div class="card"><span class="num" style="background:#7E92AE">!</span><h3 style="margin-top:12px">MTTR alto</h3><p class="mute">Las incidencias se descubren tarde (sondeo) y se diagnostican a mano.</p></div>
+  <div class="card"><span class="num" style="background:#E4007A">!</span><h3 style="margin-top:12px">¿Quién cambió qué?</h3><p class="mute">Sin trazabilidad: los cambios se aplican manualmente por CLI / SSH y no siempre se firman.</p></div>
+  <div class="card"><span class="num" style="background:#F5A524">!</span><h3 style="margin-top:12px">Rollback = volver a teclear</h3><p class="mute">Los cambios se aplican tras validarlos en entornos mínimos, y no hay un estado autoritativo al que regresar.</p></div>
+  <div class="card"><span class="num" style="background:#7E92AE">!</span><h3 style="margin-top:12px">MTTR alto</h3><p class="mute">Las incidencias se descubren tarde y se diagnostican a mano</p></div>
 </div>
 <div class="callout"><b class="amber">Las operaciones de red deben ser ágiles y deterministas:</b> Hace falta una fuente de verdad, un modelo de datos y una forma de validar antes de tocar producción.</div>
 
@@ -134,6 +135,8 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 [2 min · 5 min] Tres síntomas y una causa: configuración como texto sin modelo ni estado autoritativo. Sin trazabilidad ni rollback, el MTTR se dispara.
 Contexto: desarrollo y sistemas ya adoptaron IaC, observabilidad en tiempo real y GitOps; la red sigue con CLI, SNMP y cambios sin validación previa. Insiste: no culpar al ingeniero de red; el problema es de herramientas y metodología. La red es el cuello de botella del CI/CD del negocio.
 Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
+Actualidad (OCP 2026): la industria va justo en esta dirección. Lumentum/Oracle describen sus fabrics de conmutadores ópticos (OCS) como un "shift from legacy, CLI-driven operations to a fully automated, API-first model" con gRPC/YANG, ZTP y telemetría gNMI; Google estandariza las interfaces de OCS sobre OpenConfig/gNMI/gNOI.
+Si quieres una cita de autoridad: Meta, en su post del OCP 2026 sobre operar GPUs en cloud ajena, resume que "heterogeneity is manageable but standardization is what makes it affordable" y que cada divergencia en pruebas, transporte o telemetría "becomes engineering work". A escala hyperscale eso son equipos enteros; a nuestra escala es el ingeniero que teclea a mano.
 -->
 
 ---
@@ -153,6 +156,7 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
 
 <!--
 [5:00 · 1 min] Mapa del bloque 2: tres pilares y cómo se encadenan en un bucle cerrado. Cada uno tiene su slide.
+Los tres pilares son también los tres temas recurrentes de la parte de redes del OCP 2026: config como dato tipado (FBOSS "AI-ready"), gemelo/emulación antes de producción (NVIDIA-Keysight, Alibaba, Google) y telemetría gNMI como interfaz común (switches, OCS, incluso el BMC). No lo digas aún en detalle: cada pilar trae su referencia.
 -->
 
 ---
@@ -160,7 +164,7 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
 <div class="kick teal">Pilar 1 · Red como código</div>
 
 # La intención vive en Git, no en el router
-
+ 
 <div class="row">
 <div style="flex:1.1">
 <pre><code><span class="mute" style="font-size:14px">intent/leaf3.yml</span>
@@ -175,24 +179,24 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
 </div>
 <div style="flex:1;padding-left:8px">
 <div class="kick teal">Qué quiero</div>
-<p>Declarativo, mínimo, revisable en un Pull Request. El script rellena el resto.</p>
+<p>Declarativo, mínimo, revisable en un Pull Request.</p>
 <div class="kick red" style="margin-top:18px">Cómo se aplica</div>
 <p>Reconciliación idempotente contra el estado real del nodo, en una transacción.</p>
 <div class="chips"><span>gNMIc set</span><span style="border-color:#38BDF8">Ansible</span><span style="border-color:#F5A524">Nornir</span></div>
-<p class="mute" style="font-style:italic;font-size:16px;margin-top:22px">→ modelo YANG de SR Linux: lo que configuras es lo que consultas</p>
+<p class="mute" style="font-style:italic;font-size:16px;margin-top:22px">→ Modelo YANG de SR Linux: lo que configuras es lo que consultas</p>
+<p class="mute" style="font-style:italic;font-size:14px;margin-top:8px">OCP 2026 · Meta/Nexthop (FBOSS): config como «contratos tipados y validados por esquema» en vez de texto; es lo que permite que la IA la genere y la valide.</p>
 </div>
 </div>
-
 <!--
-[6:00 · 2 min] Intención vs estado. El YAML es el cambio real de la demo (etapa overlay). Opciones para empujar: gnmic set (nativo gNMI/YANG), Ansible, Nornir; en la demo usamos gnmic. Remata: en SR Linux el mismo modelo YANG sirve para configurar y para observar.
+[6:00 · 1,5 min] Intención vs estado. El YAML es el cambio real de la demo (etapa overlay). Opciones para empujar: gnmic set (nativo gNMI/YANG), Ansible, Nornir; en la demo usamos gnmic. Remata: en SR Linux el mismo modelo YANG sirve para configurar y para observar.
+Refuerzo OCP 2026: Meta y Nexthop AI contaron cómo abrieron FBOSS a terceros con "a schema-validated, data-driven platform configuration model" y "typed, validated contracts" en lugar de ediciones manuales de config; con eso un agente de IA genera configs, tooling y tests "with minimal human intervention". Misma idea que este YAML + YANG, a otra escala: la intención como dato estructurado es el requisito, no un lujo.
 -->
-
+ 
 ---
-
+ 
 <div class="kick amber">Pilar 2 · Gemelo digital</div>
-
 # Git → validación → despliegue
-
+ 
 <div class="steps">
   <div class="step"><span class="num" style="background:#17B3A3;width:60px;height:60px;font-size:28px">1</span><b>Pull Request</b><small>git push de la intención</small></div>
   <div class="step"><span class="num" style="background:#38BDF8;width:60px;height:60px;font-size:28px">2</span><b>Validación</b><small>el runner lee el nodo (gemelo en Containerlab) y calcula el plan</small></div>
@@ -200,17 +204,33 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
   <div class="step"><span class="num" style="background:#17B3A3;width:60px;height:60px;font-size:28px">4</span><b>Deploy</b><small>gnmic set en una transacción + verificación</small></div>
 </div>
 <div class="callout"><b class="cyan">El gemelo no es solo para la charla:</b> es el entorno de validación de cada cambio. Alternativa <em>pull-based</em>: ArgoCD / Flux reconcilian desde Git.</div>
-
 <!--
-[8:00 · 2 min] El flujo que luego verán en la demo. Insistir en que la validación lee el nodo REAL (no solo lint) y que el merge es una decisión humana con el plan delante. Mencionar pull-based (ArgoCD/Flux) sin demostrarlo.
+[7:30 · 1,5 min] El flujo que luego verán en la demo. Insistir en que la validación lee el nodo REAL (no solo lint) y que el merge es una decisión humana con el plan delante. Mencionar pull-based (ArgoCD/Flux) sin demostrarlo. Transición: "¿y esto lo hace alguien en serio? Mirad lo que se contó la semana pasada en el OCP".
 -->
-
+ 
 ---
-
+ 
 <div class="kick amber">Pilar 2 · Gemelo digital</div>
-
+# Así validan los grandes (OCP Global Summit 2026)
+ 
+<div class="row">
+  <div class="card teal-bg"><span class="kick" style="color:#0E6E63">NVIDIA + Keysight</span><h3 style="color:#0E6E63">Gemelo digital <em>lógico</em></h3>
+    <p style="font-size:18px">Emular cómputo, red, almacenamiento y orquestación para <b>ejecutar el software real</b> y validar flujos extremo a extremo <b>antes de desplegar el hierro</b>.</p></div>
+  <div class="card amber-bg"><span class="kick" style="color:#9A6200">Alibaba · vSONiC</span><h3 style="color:#9A6200">Emulación 1:1 de producción</h3>
+    <p style="font-size:18px">Tres capas: tests por <b>cada PR en CI</b>, topologías multinodo y réplicas <b>1:1 con las configs reales</b> extraídas de la infraestructura viva.</p></div>
+  <div class="card" style="border-color:#38BDF8"><span class="kick cyan">Google · Aktive / KNE</span><h3 style="color:#0369A1">512 switches en Kubernetes</h3>
+    <p style="font-size:18px">SONiC virtual sobre KNE: <b>512 switches y 12K+ enlaces</b> para ver la reconvergencia BGP ante fallos. KNE lo usan Arista, Juniper, Cisco y Nokia.</p></div>
+</div>
+<div class="callout"><b class="amber">Mismo patrón, distinta escala.</b> Nuestro gemelo son 5 SR Linux en Containerlab sobre un Proxmox; el de ellos, miles de nodos. La disciplina (validar cada PR contra una réplica fiel) es idéntica.</div>
+<!--
+[9:00 · 1 min] Slide de credibilidad: el gemelo no es un truco de charla, es práctica de hyperscaler. NVIDIA/Keysight ("Beyond Physical Digital Twins: Why Logical Digital Twins Are Essential for AI Factory Design, Validation, and Operations"): el gemelo "lógico" emula red, cómputo, storage y orquestación para ejecutar la pila de software real antes de tener el hardware. Alibaba ("From Lab to Production: vSONiC-based Testing Practices at Alibaba Scale"): capa 1 tests de nodo en vSONiC con disparo por PR, capa 2 topologías de 2 y 7 nodos con sonic-mgmt, capa 3 entorno 1:1 con las configs de producción. Google ("Simulating large-scale fabrics with Aktive"): Alpine Virtual Switch sobre KNE, malla de 512 switches, 12K+ enlaces, reconvergencia BGP con fallos de enlace y de switch. Remate: Containerlab y KNE son primos (ambos levantan NOS virtuales declarativamente); lo nuestro cabe en un Proxmox. Si vas justo de tiempo, esta slide se puede saltar sin romper el hilo.
+-->
+ 
+---
+ 
+<div class="kick amber">Pilar 2 · Gemelo digital</div>
 # Despliegue por etapas con prerrequisitos
-
+ 
 <div class="row" style="align-items:flex-end;height:300px">
   <div class="stage" style="background:#C8D0DB;color:#17233A;height:58%"><span class="d">DÍA 0</span><b>Underlay</b><small>eBGP a los spines · bootstrap, fuera de GitOps</small></div>
   <div class="gate">gate</div>
@@ -220,36 +240,35 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
 </div>
 <div class="row" style="text-align:center;font-weight:700;margin-top:8px"><div style="flex:1"></div><div style="width:56px"></div><div style="flex:1">PR manual</div><div style="width:56px"></div><div style="flex:1">PR automático</div></div>
 <p class="mute" style="font-style:italic;font-size:15px;margin-top:6px">gate = la validación comprueba en el nodo que la etapa anterior está <em>established</em> antes de dejar mergear la siguiente</p>
-
 <!--
 [10:00 · 1,5 min] Onboarding de un leaf nuevo = tres días. Cada etapa es un PR con su plan, verificación y rollback. La etapa 2 la propone el pipeline cuando la 1 está verificada (promoción automática, aprobación humana). Las gates evitan configurar el servicio sin overlay.
+Paralelismo OCP 2026: Meta no acepta un clúster de un proveedor cloud hasta que pasa "a standardized performance validation framework", de modo que el rendimiento sea "proven rather than assumed"; y en SONiC se presentó "state verification", que comprueba la coherencia entre capas (base de datos, SAI, ASIC) de forma periódica y tras warm restart. Nuestras gates son eso en pequeño: la etapa siguiente no entra hasta que la anterior está verificada en el nodo real. El día 0, en la industria, es ZTP (Nexthop hizo una demo de ZTP in-band en el stand de SONiC).
 -->
-
+ 
 ---
-
+ 
 <div class="kick cyan">Pilar 3 · Telemetría</div>
-
 # Streaming (gNMI) frente a polling (SNMP)
-
+ 
 | | SNMP | <span style="color:#fff">gNMI / gRPC</span> |
 |---|---|---|
 | Modelo | Pull: el colector pregunta | Push: el nodo publica (subscribe) |
 | Datos | MIBs jerárquicas, parciales | YANG: 100 % del estado y la config |
 | Latencia | Intervalos de minutos | Sub-segundo, on-change o sample |
 | Coste en el equipo | CPU alta en cada poll | Eficiente, una sesión gRPC |
-
+ 
 <p class="mute" style="font-style:italic;font-size:15px;margin-top:14px">Lo que el público verá en Grafana lo marca el intervalo de scrape (2 s en el lab): "en segundos, sin polling".</p>
-
+<p class="mute" style="font-style:italic;font-size:14px;margin-top:4px">OCP 2026: gNMI/gNOI/OpenConfig es ya la interfaz común de switches, de conmutadores ópticos (OCS) y hasta del BMC del switch (SONiC BMC) · Google presentó telemetría sub-milisegundo en SONiC.</p>
 <!--
 [11:30 · 1,5 min] Cambio de paradigma: el nodo publica; el modelo YANG es el mismo que configuramos. Cuidado con prometer milisegundos: el extremo a extremo son segundos.
+Contexto OCP 2026: gNMI se ha convertido en la lingua franca. Google estandariza las interfaces de los OCS (conmutadores ópticos) sobre OpenConfig/gNMI/gNOI; Lumentum/Oracle operan sus fabrics de capa 0 con gRPC/YANG y telemetría gNMI; Microsoft/Nexthop meten gNMI incluso en el BMC del switch (SONiC BMC) para tener la misma experiencia aunque el host del switch se cuelgue; y Google presentó "Software-Assisted Congestion Signaling and Sub-Millisecond Telemetry in SONiC". Ojo con dos avisos de la misma semana: Intel recordó que OCP aún no define un modelo de telemetría unificado entre capas (host, plataforma, acelerador, rack, orquestación), y Broadcom habló del "data swamp": recoger métricas irrelevantes sin pipelines de agregación no da insight. De ahí nuestro dashboard por etapas: pocas señales, las que importan.
 -->
-
+ 
 ---
-
+ 
 <div class="kick cyan">Pilar 3 · Telemetría</div>
-
 # El stack, todo open source
-
+ 
 <div class="row" style="align-items:center;text-align:center;font-weight:800;font-size:24px">
   <div class="card" style="background:#E4007A;color:#fff;border:0">SR Linux<small style="display:block;font-weight:400;font-size:15px">YANG · gNMI</small></div><div>→</div>
   <div class="card" style="background:#17B3A3;color:#fff;border:0">gNMIc<small style="display:block;font-weight:400;font-size:15px">colector gNMI</small></div><div>→</div>
@@ -258,21 +277,20 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
 </div>
 <p class="mute" style="text-align:center;margin-top:14px;font-size:16px">Logs: Alloy → Loki &nbsp;·&nbsp; Weathermap: FlowPanel &nbsp;·&nbsp; El mismo Prometheus/Grafana que ya usa tu equipo de sistemas</p>
 <div class="callout"><b class="amber">Correlar cambio y efecto.</b> Cada deploy deja una anotación en Grafana: la línea vertical en el panel es el commit que acaba de mergearse. <span style="color:#CFE0F2">Paneles por etapa: underlay · overlay · servicio · MACs · tráfico del servidor.</span></div>
-
 <!--
 [13:00 · 2 min] Es el srl-telemetry-lab de srl-labs tal cual, con dos parches: estado de sesión por vecino BGP y un dashboard por etapas. Anotaciones: el pipeline marca en Grafana cada deploy, así se ve causa y efecto. Fin del bloque 2 en el minuto 15.
+Dato OCP 2026: en el stand de SONiC la demo "Resilient SONiC Operations in Real-Time" enseñaba un drenaje de tráfico en vivo sobre una fabric leaf-spine, visualizado con telemetría en streaming en un dashboard de Grafana. Mismo stack que el nuestro. Y Meta, para atribuir cada interrupción de un job de entrenamiento a su causa, correlaciona telemetría de host, logs de firmware y eventos de red en una sola línea de tiempo: la anotación del deploy en Grafana es nuestra versión mínima de "correlar cambio y efecto".
 -->
-
+ 
 ---
-
+ 
 <!-- _class: dark -->
-
+ 
 <div class="kick amber">Bloque 3 · Demo en vivo</div>
-
 # Llega un rack nuevo de Proxmox
-
+ 
 ## Onboarding de leaf3: de día 0 a servicio, por Git
-
+ 
 <div class="row">
 <div style="flex:1.25">
 <svg width="560" height="290" viewBox="0 0 560 290" style="margin-top:-6px">
@@ -301,19 +319,18 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
 </div>
 </div>
 <p style="color:#9FB4D0;font-style:italic;font-size:15px;margin-top:6px">Qué observar: sesiones BGP · vrf-1 UP · MACs · tráfico de client3 en leaf3 e1-1</p>
-
 <!--
 [15:00 · 1 min] Escenario: leaf3 es el leaf nuevo del rack de Proxmox (client3 = ese servidor). Tiene underlay y nada más. Vamos a adherirlo al overlay y al servicio con dos PRs. Luego cambia a pantalla de demo: make status, Grafana con día 1 en rojo y vrf-1 ausente.
+Si quieres enmarcarlo: el "onboarding" fue tema estrella en OCP 2026. Meta lanzó OSPA (con Microsoft y Alibaba) porque cada plataforma de switch nueva "requires months of duplicated, custom engineering to bring up", y abrió FBOSS para que los fabricantes se "self-onboarden" sin ingenieros de Meta. Ellos hablan de onboardear plataformas; nosotros, de onboardear un leaf. La receta es la misma: contrato declarativo + validación automática + nada a mano.
 -->
-
+ 
 ---
-
+ 
 <!-- _class: dark -->
-
+ 
 <div class="kick amber">Bloque 3 · Demo en vivo</div>
-
 # Lo que vais a ver
-
+ 
 <div class="row" style="margin-bottom:14px">
   <div class="card t"><span class="num" style="background:#17B3A3;color:#17233A;width:36px;height:36px;font-size:17px">1</span> <b>make push</b><br><small style="color:#CFE0F2">rama + PR #1 documentado</small></div>
   <div class="card"><span class="num" style="background:#38BDF8;color:#17233A;width:36px;height:36px;font-size:17px">2</span> <b>validate</b><br><small style="color:#CFE0F2">prerrequisito día 0 + plan</small></div>
@@ -327,52 +344,53 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
   <div class="card"><span class="num" style="background:#38BDF8;color:#17233A;width:36px;height:36px;font-size:17px">8</span> <b>Grafana</b><br><small style="color:#CFE0F2">tráfico en leaf3 e1-1</small></div>
 </div>
 <p class="cyan" style="text-align:center;font-style:italic;font-size:20px;margin-top:26px">Dos pull requests. Cero comandos en el equipo.</p>
-
 <!--
 [16:00 · 30 s] Ocho pasos en una pantalla; luego a la terminal y a Gitea/Grafana. Demo: 8-9 min. Si el pipeline tarda, narra sobre el GIF de respaldo. Nunca sacrifiques el final (vrf-1 UP + tráfico).
 -->
-
+ 
 ---
-
+ 
 <div class="kick amber">Bloque 3 · Demo en vivo</div>
-
 # Qué acaba de pasar
-
+ 
 <p class="quote">“Cambié código en Git, hice push y la red se reconfiguró sola, mostrando su estado actualizado en pocos segundos.”</p>
 <div class="row">
   <div class="card fact"><span class="big teal">2</span><b>pull requests</b><small>uno escrito por mí, otro por el pipeline</small></div>
   <div class="card fact"><span class="big red">0</span><b>comandos en el equipo</b><small>todo por gNMI, en transacciones</small></div>
   <div class="card fact"><span class="big amber">3</span><b>verificaciones</b><small>underlay · sesiones EVPN · servicio UP</small></div>
 </div>
-
 <!--
 [24:30 · 30 s] Cierre del bloque 3 con la frase-resumen y tres números. Y recuerda: revertir cualquiera de los PRs deshace esa etapa en la red (prune). Fin del bloque 3 en el minuto 25.
 -->
-
+ 
 ---
-
+ 
 <div class="kick teal">Bloque 4 · El futuro</div>
-
 # Hacia dónde va la industria
-
+ 
 <div class="row">
   <div class="card teal-bg"><h3 style="color:#0E6E63">Kubenet <small class="mute" style="font-weight:400;font-size:14px">open source</small></h3>
     <ul><li>Kubernetes como motor de automatización</li><li>CRDs → YANG, reconciliación continua</li><li>GitOps nativo (Argo/Flux) por diseño</li><li class="mute"><em>Impulsado por Nokia; joven: para aprender y prototipar</em></li></ul></div>
   <div class="card red-bg"><h3 style="color:#A80E5C">Nokia EDA <small class="mute" style="font-weight:400;font-size:14px">comercial</small></h3>
     <ul><li>Intent-based, sobre Kubernetes</li><li>Digital Twin embebido con nodos simulados</li><li>Observabilidad y remediación integradas</li><li class="mute"><em>No es open source; corre sin licencia en modo Digital Twin</em></li></ul></div>
 </div>
-<p style="text-align:center;font-weight:700;margin-top:22px">Los mismos patrones de hoy (intención, gemelo, telemetría), industrializados.</p>
-
+<p style="text-align:center;font-weight:700;margin-top:14px">Los mismos patrones de hoy (intención, gemelo, telemetría), industrializados.</p>
+<div class="kick mute" style="margin-top:10px">Visto en el OCP Global Summit 2026 · San José, 12-15 oct</div>
+<div class="row" style="gap:12px;margin-top:4px">
+  <div class="card" style="padding:10px 14px;font-size:16px"><b>SONiC sale del hyperscale</b><br><span class="mute">Cisco: distribución validada con soporte (Nexus One) y switch OOB con «la misma automatización» que la fabric</span></div>
+  <div class="card" style="padding:10px 14px;font-size:16px"><b>FBOSS «AI-ready»</b><br><span class="mute">Meta/Nexthop: config tipada y validada por esquema para que los agentes la operen</span></div>
+  <div class="card" style="padding:10px 14px;font-size:16px"><b>OSPA</b><br><span class="mute">Meta, Microsoft y Alibaba estandarizan la capa de plataforma del switch (spec 1.0 enviada a OCP)</span></div>
+</div>
 <!--
 [25:00 · 1,5 min] Evenhanded: ni vender ni despreciar. Kubenet = los mismos conceptos en open source sobre k8s, aún joven. EDA = la versión producto, con gemelo integrado. Lo que hemos hecho hoy es la base conceptual de ambos.
+Franja OCP 2026 (30 s, no más): (1) Cisco ofrece SONiC de dos formas, comunidad o distribución validada con TAC dentro de Nexus One, y un switch de gestión fuera de banda (8001) con SONiC para usar "the same APIs and automation on the management network as on the production fabric"; Alibaba corre routers propios con silicio Cisco y SONiC. (2) FBOSS: Meta y Nexthop lo han hecho "AI-ready" con configuración tipada y validada; NVIDIA onboardeó sus ASIC Spectrum en FBOSS con CI/CD y simulación SimX antes del hardware. (3) OSPA: iniciativa nueva de OCP, co-liderada por Meta, Microsoft y Alibaba, para estandarizar power, sensores, inventario, firmware y diagnóstico del switch (lo que SAI hizo por el data plane). Mensaje: el NOS abierto y las interfaces estándar bajan a la empresa; la metodología de hoy es la que los hace operables. Nokia, por cierto, estaba en el SONiC Workshop con Microsoft (aceleración 6-12x de programación de rutas) y acoge el workshop extendido en Sunnyvale: SR Linux y SONiC no son mundos separados.
 -->
-
+ 
 ---
-
+ 
 <div class="kick teal">Bloque 4 · El futuro</div>
-
 # ¿Y la IA? Necesita una red determinista
-
+ 
 <div class="row">
   <div class="card"><b class="red">Un agente de IA falla cuando razona sobre…</b>
     <ul><li>CLI y config como texto no estructurado</li><li>telemetría con esquemas distintos por vendor</li><li>ningún estado de referencia autoritativo</li></ul></div>
@@ -380,19 +398,19 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
     <ul><li>intención versionada en Git (fuente de verdad)</li><li>modelo YANG + gNMI: datos estructurados</li><li>un gemelo donde probar antes de actuar</li></ul></div>
 </div>
 <div class="callout"><b class="amber">Los LLM son probabilísticos; las operaciones de red deben ser deterministas.</b> GitOps + telemetría es el suelo (L2–L3) sobre el que la IA puede subir a L4–L5 sin alucinar la red.</div>
-
+<p class="mute" style="font-style:italic;font-size:14px;margin-top:10px">OCP 2026, SONiC Workshop: el <em>pipeline</em> agéntico de Celestica = telemetría gNMI + <em>snapshots</em> de configuración + <b>reglas de fallo deterministas</b> + LLM local. AMD/AMI: «la IA sin gobierno no es fiable»: contexto versionado, <em>guardrails</em> y cambios revisables y reproducibles.</p>
 <!--
 [26:30 · 1,5 min] Cierra el círculo con la escalera de la slide 2: sin fuente de verdad ni datos estructurados, un agente de IA solo automatiza el caos. Lo de hoy no compite con AIOps: es su prerrequisito.
+Prueba de que no es una opinión: en el OCP 2026 todas las propuestas de "IA agéntica para operar la red" se apoyan en los tres pilares. Celestica ("Architecting Autonomous Operations for OCP Hardware: An Agentic AI Pipeline for SONiC") combina telemetría gNMI en tiempo real y snapshots de configuración con "deterministic fault rules and locally hosted LLMs" para RCA y remediación, priorizando la soberanía del dato on-prem. HPE ("Accelerate SONiC Issue Triage and RCA with Agentic AI") lo usa para predicción de fallos de ópticas y RCA de crashes, y señala que la falta de conocimiento institucional es lo que frena la adopción de SONiC fuera de los hyperscalers. Microsoft (validación de hardware) insiste en "local-data-first" y en devolver lo aprendido "back into the source of truth". AMD/AMI (firmware): "ungoverned AI is unreliable and hard to trust"; su respuesta es contexto versionado en el repo, guardrails y playbooks de revisión para que cada cambio asistido por IA sea "reviewable and reproducible". Traducción: Git como fuente de verdad, datos YANG/gNMI y un gemelo donde probar. Exactamente lo que acabamos de montar.
 -->
-
+ 
 ---
-
+ 
 <!-- _class: dark -->
-
+ 
 <div class="kick cyan">Conclusiones</div>
-
 # Sense · Think · Act
-
+ 
 <div class="row" style="align-items:center">
   <div class="card a"><h3 class="amber">Sense</h3><b style="font-size:21px">Telemetría gNMI</b><br><small style="color:#CFE0F2">la red publica su estado</small></div><div style="font-size:30px;color:#7E92AE">→</div>
   <div class="card"><h3 class="cyan">Think</h3><b style="font-size:21px">Validación en el gemelo</b><br><small style="color:#CFE0F2">plan y prerrequisitos</small></div><div style="font-size:30px;color:#7E92AE">→</div>
@@ -400,21 +418,20 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
 </div>
 <p style="font-size:24px;font-weight:800;margin-top:30px">Código + telemetría + GitOps = bucle cerrado funcional.</p>
 <p class="cyan" style="font-size:20px;font-style:italic">La red deja de ser el obstáculo y pasa a integrarse en el pipeline del negocio.</p>
-
 <!--
 [28:00 · 1 min] Sense/think/act = telemetría / validación / deploy. Tres pilares, un bucle cerrado. Y todo sobre un Proxmox modesto, sin licencias.
+Cierre con actualidad, si hay tiempo: Omar Baldonado (Meta) defendió en su keynote del OCP 2026 que la red para IA "is a co-design problem no single company can solve alone" y que las iniciativas abiertas hacen avanzar a todo el ecosistema. Lo mismo a nuestra escala: todo lo que habéis visto es open source y reproducible esta tarde.
 -->
-
+ 
 ---
-
+ 
 <!-- _class: dark -->
 <!-- _paginate: false -->
 <!-- _footer: '' -->
-
+ 
 # <span style="font-size:60px">Gracias</span>
-
+ 
 <p class="cyan" style="font-size:22px">Todo el laboratorio, open source y reproducible</p>
-
 <div class="row" style="align-items:center;margin-top:30px">
   <div style="width:150px;height:150px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#0E2038;font-weight:800;font-size:28px;flex:none">QR</div>
   <div style="padding-left:10px">
@@ -423,8 +440,14 @@ Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
     <span style="color:#AEC2DE;font-size:16px">Sobre un Proxmox modesto, sin gastar un euro en licencias.</span>
   </div>
 </div>
-<p style="color:#7E92AE;margin-top:60px">Víctor Serrano Bazán · Tecnocrática Tech Day 2026</p>
-
+<p style="color:#7E92AE;margin-top:60px">Víctor Serrano · Tecnocrática Tech Day 2026</p>
 <!--
 [29:00] Deja esta slide fija durante las preguntas. Sustituye el placeholder QR por el QR real del repo (por ejemplo: <img src="qr.png" width="150">).
+Referencias OCP Global Summit 2026 (San José, 12-15 oct; SONiC Workshop 14 oct; workshop extendido en Nokia Sunnyvale 16 oct). Grabaciones y slides en opencompute.org/events/ocp-summit/2026-ocp-global-summit/recorded-content/ a los pocos días del evento.
+- Meta, "OCP Summit 2026: Powering AI with Open Innovations in Scale-Up, Scale-Out, and Scale-Across Networks" (engineering.fb.com, 12 oct): IcePack/IceCube 102.4T, FPF, MetaRoCE open source, OSPA v1.0, FBOSS self-onboarding, ESUN 1.0 -> 1.1, validacion estandarizada antes de aceptar clusteres cloud.
+- Keynote Meta, Omar Baldonado, "Betting on the Network: Meta's Case for Full-Stack, Open AI Networking".
+- NAND Research, "Cisco at OCP 2026" (14 oct) y nota de prensa Cisco: SONiC validado en Nexus One, Live Protect para SONiC (2T 2027), Cisco 8001 OOB con SONiC, P200 en produccion en Microsoft y Alibaba, G300/G302, USFP con NVIDIA.
+- Nokia en OCP 2026 (nokia.com/events/ocp-global-summit): sesiones de Clayton Wagar (escalado multidimensional), Steve Hand (OIF), Microsoft+Nokia "6-12x Route Programming Acceleration in SONiC", PTP boundary clocks; SONiC Workshop extendido en Sunnyvale.
+- SONiC Workshop (agenda en sonic-events-at-ocp-global-summit-2026.sessionize.com): Celestica "Architecting Autonomous Operations for OCP Hardware: An Agentic AI Pipeline for SONiC"; Alibaba "From Lab to Production: vSONiC-based Testing Practices at Alibaba Scale"; Google "Simulating large-scale fabrics with Aktive"; "Improving SONiC Reliability (State Verification)"; Alibaba/Google "Formal Methods in SONiC"; HPE "Accelerate SONiC Issue Triage and RCA with Agentic AI"; demos "Resilient SONiC Operations in Real-Time" e "In-band ZTP" (Nexthop); Microsoft/Nexthop "SONiC BMC"; Microsoft "SONiC Community Year in Review" (15+ organizaciones, 80+ features).
+- Programa principal (2026ocpglobal.fnvirtual.app/a/schedule): NVIDIA+Keysight "Beyond Physical Digital Twins: Why Logical Digital Twins Are Essential for AI Factory Design, Validation, and Operations"; Nexthop+Meta "Open, AI-Ready FBOSS"; NVIDIA+Meta "NVIDIA SDK + FBOSS"; Google "Standardizing OCS Interfaces" (OpenConfig/gNMI/gNOI); Lumentum+Oracle "Zero-Touch OCS Fabrics" (de CLI a API-first); Google "Software-Assisted Congestion Signaling and Sub-Millisecond Telemetry in SONiC"; Intel "Unified Full-Stack Telemetry for AI Systems"; Broadcom "Creating Aggregation Pipelines to Conquer Large Telemetry Challenges"; Marvell+Broadcom "Closing the Observability Loop in SAI"; AMD+AMI "Trusted, AI-Ready Open Firmware"; Microsoft "AI-Native Hardware Validation"; BE Networks+IREN "Networking In Silo is Not Enough"; Meta "Achieving AI Cluster Reliability at Scale".
 -->
