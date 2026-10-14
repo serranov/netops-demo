@@ -75,7 +75,7 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 
 ## Aplicación de mecanismos GitOps sobre Gemelos Digitales
 
-<div class="chips" style="margin-top:28px"><span>Proxmox VE</span><span>Containerlab</span><span>Telemetría</span></div>
+<div class="chips" style="margin-top:28px"><span>Proxmox VE</span><span>Git</span><span>Containerlab</span><span>Telemetría</span></div>
 
 <p style="margin-top:70px;font-weight:700">Víctor Serrano Bazán - Consulting System Engineer @ Nokia</p>
 
@@ -185,7 +185,7 @@ Al final, la heterogeneidad se puede gestionar mejor o peor, pero la estandariza
 <div class="kick red" style="margin-top:18px">Cómo se aplica</div>
 <p>Reconciliación idempotente contra el estado real del nodo, en una transacción.</p>
 <div class="chips"><span>gNMI</span><span style="border-color:#38BDF8">Ansible</span><span style="border-color:#F5A524">Nornir</span></div>
-<p class="mute" style="font-style:italic;font-size:16px;margin-top:22px">→ Modelo YANG: lo que configuras es lo que consultas</p>
+<p class="mute" style="font-style:italic;font-size:16px;margin-top:22px">→ Modelo YANG: lo que configuras es lo que consultas.</p>
 </div>
 </div>
 
@@ -208,9 +208,9 @@ Refuerzo: Teniendo un "modelo de configuración de la plataforma basado en datos
   <div class="card amber-bg"><h3 style="color:#9A6200">Emulación 1:1 de producción</h3>
     <p style="font-size:18px">Tres capas: tests por <b>cada PR en CI</b>, topologías multinodo y réplicas <b>1:1 con las configs reales</b> extraídas de la infraestructura viva.</p></div>
   <div class="card" style="border-color:#38BDF8"><h3 style="color:#0369A1">Topología a escala con Kubernetes</h3>
-    <p style="font-size:18px">Kubernetes como motor de automatización y de emulación de miles de nodos y enlaces para validar el comportamiento real de la red ante cada cambio.</p></div>
+    <p style="font-size:18px">Como motor de automatización y de emulación de miles de nodos y enlaces para validar el comportamiento real de la red ante cada cambio.</p></div>
 </div>
-<div class="callout" style="text-align:center"><b class="cyan">El gemelo no es solo para la charla:</b> es el entorno de validación de cada cambio.</div>
+<div class="callout" style="text-align:center"><b class="cyan">El gemelo digital no es solo para la charla:</b> es el entorno de validación de cada cambio.</div>
 
 <!--
 [07:00 · 1min y 30s] El gemelo no es un truco de charla, es práctica habitual empresas como los hiperescalares.
@@ -225,11 +225,11 @@ Refuerzo: Teniendo un "modelo de configuración de la plataforma basado en datos
 | | SNMP | <span style="color:#fff">gNMI / gRPC</span> |
 |---|---|---|
 | Modelo | Pull: el colector pregunta | Push: el nodo publica (subscribe) |
-| Datos | MIBs jerárquicas, parciales | YANG: 100 % del estado y la config |
-| Latencia | Intervalos de minutos | Sub-segundo, on-change o sample |
-| Coste en el equipo | CPU alta en cada poll | Eficiente, una sesión gRPC |
+| Datos | MIBs jerárquicas, parciales | YANG: 100% del estado y la config |
+| Latencia | Intervalos de segundos o minutos | Sub-segundo, on-change o muestreo |
+| Coste en el equipo | CPU alta en cada sondeo | Eficiente, una sesión gRPC |
 
-<p class="mute" style="font-style:italic;font-size:14px;margin-top:4px">OCP 2026: gNMI/gNOI/OpenConfig es ya la interfaz común de switches, de conmutadores ópticos (OCS) y hasta del BMC del switch (SONiC BMC) · Google presentó telemetría sub-milisegundo en SONiC.</p>
+<p class="mute" style="text-align:center;font-style:italic;font-size:14px;margin-top:4px">OCP 2026: Interfaces gRPC de OpenConfig (gNMI/gNOI/gNSI) son ya las interfaces comunes de switches, de conmutadores ópticos y hasta del BMC del switch.</p>
 
 <!--
 [08:30 · 1min y 30s] Cambio de paradigma: el nodo publica; el modelo YANG es el mismo que configuramos.
@@ -269,12 +269,11 @@ Contexto OCP 2026: gNMI se ha convertido en la lengua franca sobre interfaces es
 </svg>
 </div>
 <div style="flex:1">
-  <div class="card" style="border-color:#7E92AE;padding:12px 18px;margin-bottom:10px"><span class="kick" style="color:#7E92AE">Día 0</span><b style="font-size:20px;display:block">underlay eBGP</b><small style="color:#CFE0F2">ya está (bootstrap)</small></div>
-  <div class="card t" style="padding:12px 18px;margin-bottom:10px"><span class="kick teal">Día 1</span><b style="font-size:20px;display:block">overlay iBGP EVPN</b><small style="color:#CFE0F2">PR #1 · lo abro yo</small></div>
-  <div class="card a" style="padding:12px 18px"><span class="kick amber">Día 2</span><b style="font-size:20px;display:block">servicio vrf-1 / VNI 1</b><small style="color:#CFE0F2">PR #2 · lo abre el pipeline</small></div>
+  <div class="card" style="border-color:#7E92AE;padding:12px 18px;margin-bottom:10px"><span class="kick" style="color:#7E92AE">Día 0</span><b style="font-size:20px;display:block">Onboarding</b><small style="color:#CFE0F2">Conexión física y underlay eBGP</small></div>
+  <div class="card t" style="padding:12px 18px;margin-bottom:10px"><span class="kick teal">Día 1</span><b style="font-size:20px;display:block">Overlay iBGP EVPN</b><small style="color:#CFE0F2">PR #1 · Abierto a mano</small></div>
+  <div class="card a" style="padding:12px 18px"><span class="kick amber">Día 2</span><b style="font-size:20px;display:block">Servicio de nivel 2</b><small style="color:#CFE0F2">PR #2 · Abierto automáticamente por el pipeline</small></div>
 </div>
 </div>
-<p style="color:#9FB4D0;font-style:italic;font-size:15px;margin-top:6px">Qué observar: sesiones BGP · vrf-1 UP · MACs · tráfico de client3 en leaf3 e1-1</p>
 
 <!--
 [10:00 · 10 min] Es el srl-telemetry-lab de srl-labs tal cual, con dos parches: estado de sesión por vecino BGP y un dashboard por etapas.
@@ -287,7 +286,9 @@ Anotaciones: el pipeline marca en Grafana cada deploy, así se ve causa y efecto
 
 <div class="kick teal">Bloque 4 · El futuro</div>
 
-# ¿Y la IA? Necesita una red determinista
+# ¿Y la IA?
+
+## Necesita una red determinista
 
 <div class="row">
   <div class="card"><b class="red">Un agente de IA falla cuando razona sobre…</b>
@@ -295,8 +296,8 @@ Anotaciones: el pipeline marca en Grafana cada deploy, así se ve causa y efecto
   <div class="card teal-bg"><b style="color:#0E6E63">Lo que acabamos de construir le da…</b>
     <ul><li>Intención versionada en Git (fuente de verdad)</li><li>Modelo YANG + gNMI: datos estructurados</li><li>Un gemelo donde probar antes de actuar</li></ul></div>
 </div>
-<div class="callout"><b class="amber">Los LLM son probabilísticos; las operaciones de red deben ser deterministas.</b> GitOps + telemetría es el suelo (L2–L3) sobre el que la IA puede subir a L4–L5 sin alucinar la red.</div>
-<p class="mute" style="font-style:italic;font-size:14px;margin-top:10px">OCP 2026, SONiC Workshop: el <em>pipeline</em> agéntico de Celestica = telemetría gNMI + <em>snapshots</em> de configuración + <b>reglas de fallo deterministas</b> + LLM local. AMD/AMI: «la IA sin gobierno no es fiable»: contexto versionado, <em>guardrails</em> y cambios revisables y reproducibles.</p>
+<div class="callout" style="text-align:center"><b class="amber">Los LLM son probabilísticos; las operaciones de red deben ser deterministas.</b>
+GitOps + telemetría es el suelo (L2–L3) sobre el que la IA puede construir para llegar a L4–L5.</div>
 
 <!--
 [20:00 · 4min] Un agente es un software autónomo que recibe un objetivo y utiliza IA para percibir el entorno, razonar sobre sus metas y tomar sucesivas acciones para conseguir alcanzar el objetivo marcado.
@@ -337,7 +338,7 @@ Cierre con actualidad: Meta dice que la red para IA "es un problema de diseño c
 
 # <span style="font-size:60px">Gracias</span>
 
-<p class="cyan" style="font-size:22px">Todo el laboratorio, open source y reproducible</p>
+<p class="cyan" style="font-size:22px">Todo el laboratorio está basado en componentes open source y es totalmente reproducible</p>
 <div class="row" style="align-items:center;margin-top:30px">
   <div style="width:150px;height:150px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#0E2038;font-weight:800;font-size:28px;flex:none">QR</div>
   <div style="padding-left:10px">
