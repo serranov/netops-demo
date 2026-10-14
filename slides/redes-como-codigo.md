@@ -293,10 +293,11 @@ Anotaciones: el pipeline marca en Grafana cada deploy, así se ve causa y efecto
 ## Necesita una red determinista
 
 <div class="row">
-  <div class="card"><b class="red">Un agente de IA falla cuando razona sobre…</b>
-    <ul><li>CLI y config como texto no estructurado</li><li>Telemetría con esquemas distintos por vendor</li><li>Ningún estado de referencia autoritativo</li></ul></div>
-  <div class="card teal-bg"><b style="color:#0E6E63">Lo que acabamos de construir le da…</b>
-    <ul><li>Intención versionada en Git (fuente de verdad)</li><li>Modelo YANG + gNMI: datos estructurados</li><li>Un gemelo donde probar antes de actuar</li></ul></div>
+  <!-- Los titulos tienen la misma altura fija (2 lineas) para que los bullets de ambas tarjetas queden a la misma altura -->
+  <div class="card"><b class="red" style="display:block;min-height:2.6em">Un agente de IA falla cuando razona sobre…</b>
+    <ul><li>CLI y config como texto no estructurado</li><li>Telemetría con esquemas por fabricante</li><li>Ningún estado de referencia autoritativo</li></ul></div>
+  <div class="card teal-bg"><b style="color:#0E6E63;display:block;min-height:2.6em">Lo que acabamos de construir le da…</b>
+    <ul><li>Git como fuente de verdad versionada</li><li>Modelo YANG + gNMI: datos estructurados</li><li>Un gemelo donde probar antes de actuar</li></ul></div>
 </div>
 <div class="callout" style="text-align:center"><b class="amber" style="display:block;margin-bottom:8px">Los LLM son probabilísticos; las operaciones de red deben ser deterministas.</b>
 GitOps + telemetría es el suelo (L2–L3) sobre el que la IA puede construir para llegar a L4–L5.</div>
@@ -337,25 +338,27 @@ Diferentes propuestas de "IA agéntica para operar la red" se apoyan en los tres
     <text x="130" y="178" fill="#F5A524">Sense</text><text x="380" y="178" fill="#38BDF8">Think</text><text x="630" y="178" fill="#17B3A3">Act</text>
   </g>
   <g font-size="13" font-weight="700" fill="#CFE0F2" text-anchor="middle">
-    <text x="130" y="200">Telemetría gNMI</text><text x="380" y="200">Validación en el gemelo</text><text x="630" y="200">Deploy desde Git</text>
+    <text x="130" y="200">Telemetría</text><text x="380" y="200">Validación</text><text x="630" y="200">Despliegue</text>
   </g>
   <!-- Red (nube) y bucle -->
   <g transform="translate(342,238) scale(3.5)"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="#16304F" stroke="#fff" stroke-width="0.6"/></g>
   <text x="384" y="296" font-size="16" font-weight="800" fill="#fff" text-anchor="middle">Red</text>
   <g fill="none" stroke="#fff" stroke-width="2">
-    <path d="M346 292 C 240 292, 150 270, 130 214" marker-end="url(#ar)"/>
+    <path d="M346 292 C 240 292, 170 270, 150 214" marker-end="url(#ar)"/>
     <path d="M630 214 C 630 270, 540 292, 430 292" marker-end="url(#ar)"/>
   </g>
-  <text x="218" y="252" font-size="14" font-style="italic" fill="#CFE0F2" text-anchor="middle">Datos</text>
+  <text x="236" y="254" font-size="14" font-style="italic" fill="#CFE0F2" text-anchor="middle">Datos</text>
   <!-- Cerebro (Think) con salidas: analítica · automatización · asistencia a humanos -->
-  <g fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
-    <path d="M370 82c-8-2-14 4-12 11c-6 2-6 12 0 14c-1 6 6 10 12 7c3 4 10 4 12 0c6 3 13-1 12-7c6-2 6-12 0-14c2-7-4-13-12-11c-3-4-9-4-12 0z"/>
-    <path d="M380 82v32"/>
+  <g transform="translate(358.4,76.4) scale(1.8)" fill="none" stroke="#fff" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
+    <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
+    <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/>
+    <path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/>
   </g>
   <g fill="none" stroke="#38BDF8" stroke-width="2" stroke-dasharray="3 5">
-    <line x1="356" y1="98" x2="196" y2="98" marker-end="url(#arc)"/>
-    <line x1="404" y1="98" x2="564" y2="98" marker-end="url(#arc)"/>
-    <line x1="380" y1="78" x2="380" y2="48" marker-end="url(#arc)"/>
+    <line x1="352" y1="98" x2="196" y2="98" marker-end="url(#arc)"/>
+    <line x1="408" y1="98" x2="564" y2="98" marker-end="url(#arc)"/>
+    <line x1="380" y1="74" x2="380" y2="50" marker-end="url(#arc)"/>
   </g>
   <!-- Analítica -->
   <g fill="#fff"><rect x="150" y="96" width="6" height="12"/><rect x="160" y="88" width="6" height="20"/><rect x="170" y="92" width="6" height="16"/></g>
@@ -366,8 +369,8 @@ Diferentes propuestas de "IA agéntica para operar la red" se apoyan en los tres
   </g>
   <text x="618" y="104" font-size="15" fill="#fff" text-anchor="start">Automatización</text>
   <!-- Asistencia a humanos -->
-  <g fill="none" stroke="#fff" stroke-width="2"><circle cx="380" cy="26" r="9"/><path d="M372 40c2 4 14 4 16 0"/></g>
-  <text x="362" y="31" font-size="15" fill="#fff" text-anchor="end">Asistencia a humanos</text>
+  <g transform="translate(360.8,7.6) scale(1.6)" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></g>
+  <text x="356" y="31" font-size="15" fill="#fff" text-anchor="end">Asistencia a humanos</text>
   <!-- Agentes IA (robot) -->
   <g fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round">
     <rect x="598" y="18" width="24" height="18" rx="4"/><line x1="610" y1="10" x2="610" y2="18"/><circle cx="610" cy="8" r="2" fill="#fff"/>
@@ -375,11 +378,11 @@ Diferentes propuestas de "IA agéntica para operar la red" se apoyan en los tres
   </g>
   <text x="630" y="31" font-size="15" fill="#fff" text-anchor="start">Agentes IA</text>
   <!-- Fuentes externas: web · librerías -->
-  <g fill="none" stroke="#fff" stroke-width="2"><circle cx="30" cy="228" r="11"/><ellipse cx="30" cy="228" rx="5" ry="11"/><line x1="19" y1="228" x2="41" y2="228"/></g>
-  <text x="48" y="233" font-size="15" fill="#fff">Web</text>
-  <g fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><rect x="20" y="258" width="20" height="22" rx="2"/><line x1="26" y1="258" x2="26" y2="280"/></g>
-  <text x="48" y="273" font-size="15" fill="#fff">Librerías</text>
-  <path d="M62 252 C 40 228, 42 184, 66 172" fill="none" stroke="#fff" stroke-width="2" marker-end="url(#ar)"/>
+  <g fill="none" stroke="#fff" stroke-width="2"><circle cx="30" cy="262" r="11"/><ellipse cx="30" cy="262" rx="5" ry="11"/><line x1="19" y1="262" x2="41" y2="262"/></g>
+  <text x="48" y="267" font-size="15" fill="#fff">Web</text>
+  <g fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><rect x="20" y="296" width="20" height="22" rx="2"/><line x1="26" y1="296" x2="26" y2="318"/></g>
+  <text x="48" y="311" font-size="15" fill="#fff">Librerías</text>
+  <path d="M88 262 C 128 262, 122 238, 108 214" fill="none" stroke="#fff" stroke-width="2" marker-end="url(#ar)"/>
 </svg>
 <p style="font-size:24px;font-weight:800;margin-top:14px">Código + telemetría + GitOps = bucle cerrado funcional.</p>
 <p class="cyan" style="font-size:20px;font-style:italic">La red pasa a integrarse en el pipeline del negocio.</p>
@@ -400,7 +403,7 @@ Cierre con actualidad: Meta dice que la red para IA "es un problema de diseño c
 <p class="cyan" style="font-size:22px">Todo el laboratorio está basado en componentes open source y es totalmente reproducible</p>
 <div class="row" style="align-items:center;margin-top:30px">
   <div style="width:170px;height:170px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none"><!-- QR: https://github.com/serranov/netops-demo (generado con segno; también en slides/qr.png y qr.svg) -->
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" width="146" height="146" shape-rendering="crispEdges"><path stroke="#0e2038" d="M0 0.5h7m3 0h3m1 0h2m3 0h1m2 0h7m-29 1h1m5 0h1m3 0h1m3 0h3m5 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m2 0h2m1 0h1m1 0h1m2 0h3m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h3m1 0h2m2 0h3m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m4 0h1m2 0h3m1 0h1m3 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m1 0h2m1 0h3m1 0h2m2 0h1m2 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-19 1h1m1 0h1m1 0h2m1 0h2m1 0h1m-21 1h1m2 0h1m1 0h2m1 0h1m1 0h1m1 0h5m4 0h1m1 0h1m-22 1h1m2 0h1m1 0h1m1 0h1m10 0h1m1 0h1m2 0h1m2 0h1m-28 1h3m1 0h4m1 0h1m5 0h2m1 0h1m1 0h1m2 0h4m-27 1h1m1 0h1m4 0h1m1 0h4m6 0h1m3 0h1m1 0h2m-28 1h2m1 0h2m1 0h1m3 0h1m3 0h1m2 0h1m3 0h2m2 0h1m1 0h2m-29 1h1m1 0h3m2 0h6m6 0h3m-20 1h1m3 0h1m4 0h2m3 0h1m3 0h1m1 0h7m-29 1h2m1 0h2m2 0h1m1 0h2m2 0h1m1 0h1m1 0h2m1 0h3m2 0h1m1 0h1m-28 1h4m1 0h2m1 0h1m2 0h4m1 0h2m2 0h1m2 0h1m3 0h1m-26 1h4m1 0h1m6 0h1m1 0h1m1 0h1m1 0h4m1 0h1m2 0h1m-29 1h1m1 0h1m1 0h1m1 0h2m1 0h1m3 0h1m3 0h1m3 0h1m1 0h2m2 0h2m-27 1h4m1 0h1m3 0h3m3 0h1m2 0h2m1 0h2m2 0h2m-29 1h1m2 0h1m1 0h3m6 0h3m1 0h7m1 0h1m-19 1h6m2 0h1m2 0h2m3 0h1m1 0h3m-29 1h7m3 0h5m2 0h1m2 0h1m1 0h1m1 0h1m2 0h1m-28 1h1m5 0h1m1 0h2m3 0h1m1 0h2m1 0h1m1 0h1m3 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h1m1 0h1m1 0h1m2 0h1m2 0h5m2 0h2m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h2m4 0h2m1 0h6m-28 1h1m1 0h3m1 0h1m4 0h2m6 0h2m3 0h3m1 0h1m-29 1h1m5 0h1m3 0h2m3 0h3m1 0h3m2 0h1m2 0h1m-28 1h7m1 0h2m3 0h1m3 0h1m2 0h6m1 0h1"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" width="146" height="146" shape-rendering="crispEdges"><path fill="#0e2038" d="M0 0h7v1h-7zM10 0h3v1h-3zM14 0h2v1h-2zM19 0h1v1h-1zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM10 1h1v1h-1zM14 1h3v1h-3zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h2v1h-2zM12 2h1v1h-1zM14 2h1v1h-1zM17 2h3v1h-3zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM10 3h3v1h-3zM14 3h2v1h-2zM18 3h3v1h-3zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM11 4h1v1h-1zM14 4h3v1h-3zM18 4h1v1h-1zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM11 5h3v1h-3zM15 5h2v1h-2zM19 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM10 7h1v1h-1zM12 7h1v1h-1zM14 7h2v1h-2zM17 7h2v1h-2zM20 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h5v1h-5zM21 8h1v1h-1zM23 8h1v1h-1zM2 9h1v1h-1zM5 9h1v1h-1zM7 9h1v1h-1zM9 9h1v1h-1zM20 9h1v1h-1zM22 9h1v1h-1zM25 9h1v1h-1zM28 9h1v1h-1zM1 10h3v1h-3zM5 10h4v1h-4zM10 10h1v1h-1zM16 10h2v1h-2zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h4v1h-4zM1 11h1v1h-1zM3 11h1v1h-1zM8 11h1v1h-1zM10 11h4v1h-4zM20 11h1v1h-1zM24 11h1v1h-1zM26 11h2v1h-2zM0 12h2v1h-2zM3 12h2v1h-2zM6 12h1v1h-1zM10 12h1v1h-1zM14 12h1v1h-1zM17 12h1v1h-1zM21 12h2v1h-2zM25 12h1v1h-1zM27 12h2v1h-2zM0 13h1v1h-1zM2 13h3v1h-3zM7 13h6v1h-6zM19 13h3v1h-3zM2 14h1v1h-1zM6 14h1v1h-1zM11 14h2v1h-2zM16 14h1v1h-1zM20 14h1v1h-1zM22 14h7v1h-7zM0 15h2v1h-2zM3 15h2v1h-2zM7 15h1v1h-1zM9 15h2v1h-2zM13 15h1v1h-1zM15 15h1v1h-1zM17 15h2v1h-2zM20 15h3v1h-3zM25 15h1v1h-1zM27 15h1v1h-1zM0 16h4v1h-4zM5 16h2v1h-2zM8 16h1v1h-1zM11 16h4v1h-4zM16 16h2v1h-2zM20 16h1v1h-1zM23 16h1v1h-1zM27 16h1v1h-1zM2 17h4v1h-4zM7 17h1v1h-1zM14 17h1v1h-1zM16 17h1v1h-1zM18 17h1v1h-1zM20 17h4v1h-4zM25 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM2 18h1v1h-1zM4 18h1v1h-1zM6 18h2v1h-2zM9 18h1v1h-1zM13 18h1v1h-1zM17 18h1v1h-1zM21 18h1v1h-1zM23 18h2v1h-2zM27 18h2v1h-2zM2 19h4v1h-4zM7 19h1v1h-1zM11 19h3v1h-3zM17 19h1v1h-1zM20 19h2v1h-2zM23 19h2v1h-2zM27 19h2v1h-2zM0 20h1v1h-1zM3 20h1v1h-1zM5 20h3v1h-3zM14 20h3v1h-3zM18 20h7v1h-7zM26 20h1v1h-1zM8 21h6v1h-6zM16 21h1v1h-1zM19 21h2v1h-2zM24 21h1v1h-1zM26 21h3v1h-3zM0 22h7v1h-7zM10 22h5v1h-5zM17 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM27 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h2v1h-2zM13 23h1v1h-1zM15 23h2v1h-2zM18 23h1v1h-1zM20 23h1v1h-1zM24 23h3v1h-3zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM10 24h1v1h-1zM12 24h1v1h-1zM14 24h1v1h-1zM17 24h1v1h-1zM20 24h5v1h-5zM27 24h2v1h-2zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM13 25h2v1h-2zM19 25h2v1h-2zM22 25h6v1h-6zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM11 26h2v1h-2zM19 26h2v1h-2zM24 26h3v1h-3zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM10 27h2v1h-2zM15 27h3v1h-3zM19 27h3v1h-3zM24 27h1v1h-1zM27 27h1v1h-1zM0 28h7v1h-7zM8 28h2v1h-2zM13 28h1v1h-1zM17 28h1v1h-1zM20 28h6v1h-6zM27 28h1v1h-1z"/></svg>
   </div>
   <div style="padding-left:10px">
     <b style="font-size:24px">github.com/serranov/netops-demo</b><br>
