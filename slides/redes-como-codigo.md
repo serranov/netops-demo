@@ -5,7 +5,7 @@ size: 16:9
 paginate: true
 footer: 'Redes como Código · Tecnocrática Tech Day 2026'
 title: 'Redes como Código: Aplicación de GitOps en gemelos digitales'
-author: Víctor Serrano
+author: Víctor Serrano Bazán - Consulting System Engineer @ Nokia
 description: 'Config-as-code, validación en un gemelo y telemetría en streaming sobre una fabric Nokia SR Linux en Containerlab.'
 ---
 
@@ -23,13 +23,13 @@ Los comentarios HTML que no son directivas son las NOTAS DE ORADOR (modo present
 :root { --navy:#0E2038; --navy2:#16304F; --teal:#17B3A3; --cyan:#38BDF8; --amber:#F5A524; --red:#E4007A;
         --ink:#17233A; --mute:#5B6B82; --line:#D8E2EF; --bg:#F5F8FC; --gray:#9AA7B8; }
 section { background: var(--bg); color: var(--ink); font-family: Calibri, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-          padding: 40px 56px 60px; font-size: 22px; line-height: 1.3; justify-content: flex-start; position: relative; }
+          padding: 40px 56px 60px; font-size: 25px; line-height: 1.3; justify-content: flex-start; position: relative; }
 section.dark { background: var(--navy); color: #fff; }
-section h1 { font-size: 40px; font-weight: 800; margin: 2px 0 18px; color: var(--ink); letter-spacing: -0.3px; }
+section h1 { font-size: 44px; font-weight: 800; margin: 2px 0 18px; color: var(--ink); letter-spacing: -0.3px; }
 section.dark h1 { color: #fff; }
 section h2 { font-size: 24px; font-weight: 600; color: var(--cyan); margin: -6px 0 18px; }
 section p { margin: 6px 0; }
-.kick { font-size: 13px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; margin: 0 0 2px; }
+.kick { font-size: 15px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; margin: 0 0 2px; }
 .red { color: var(--red); } .teal { color: var(--teal); } .cyan { color: var(--cyan); } .amber { color: var(--amber); } .mute { color: var(--mute); }
 .row { display: flex; gap: 18px; align-items: stretch; }
 .card { flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 22px; }
@@ -37,30 +37,30 @@ section p { margin: 6px 0; }
 .card.amber-bg { background: #FEF3DC; border-color: var(--amber); }
 section.dark .card { background: var(--navy2); border-color: var(--cyan); color: #fff; }
 section.dark .card.t { border-color: var(--teal); } section.dark .card.a { border-color: var(--amber); }
-.card h3 { margin: 0 0 8px; font-size: 24px; font-weight: 800; }
-.card ul { margin: 6px 0 0; padding-left: 22px; } .card li { margin: 5px 0; } ul { margin: 6px 0; }
-.callout { background: var(--navy); color: #fff; border-radius: 12px; padding: 14px 22px; margin-top: 18px; font-size: 19px; }
+.card h3 { margin: 0 0 8px; font-size: 27px; font-weight: 800; }
+.card ul { margin: 6px 0 0; padding-left: 22px; } .card li { margin: 10px 0; } ul { margin: 6px 0; }
+.callout { background: var(--navy); color: #fff; border-radius: 12px; padding: 18px 26px; margin-top: 26px; font-size: 22px; }
 section.dark .callout { background: var(--navy2); }
-.chips span { display: inline-block; border: 1px solid var(--teal); border-radius: 999px; padding: 4px 14px; font-size: 14px; font-weight: 700; margin: 6px 8px 0 0; }
+.chips span { display: inline-block; border: 1px solid var(--teal); border-radius: 999px; padding: 5px 16px; font-size: 16px; font-weight: 700; margin: 12px 8px 0 0; }
 section.dark .chips span { background: var(--navy2); color: #fff; }
 .num { display: inline-flex; width: 48px; height: 48px; border-radius: 50%; align-items: center; justify-content: center; font-weight: 800; color: #fff; font-size: 22px; }
-.steps { display: flex; gap: 12px; } .step { flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 12px; text-align: center; }
-.step b { display: block; font-size: 21px; margin: 10px 0 6px; } .step small { color: var(--mute); font-size: 15px; line-height: 1.25; display: block; }
+.steps { display: flex; gap: 12px; } .step { flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 24px 14px; text-align: center; }
+.step b { display: block; font-size: 24px; margin: 14px 0 8px; } .step small { color: var(--mute); font-size: 18px; line-height: 1.25; display: block; }
 .ladder { display: flex; gap: 10px; align-items: flex-end; height: 290px; margin-top: 10px; }
 .lv { flex: 1; border-radius: 8px; color: #fff; font-weight: 800; font-size: 26px; text-align: center; padding-top: 8px; }
 .lv.g { background: #C8D0DB; color: var(--ink); } .lv.t { background: var(--teal); } .lv.l { background: #8FD3CB; }
 .lab { display: flex; gap: 10px; text-align: center; } .lab div { flex: 1; } .lab b { display: block; font-size: 17px; } .lab small { color: var(--mute); font-size: 13px; }
 .tags { display: flex; gap: 10px; margin-bottom: 6px; } .tag { flex: 1; text-align: center; border-radius: 999px; padding: 4px 0; font-size: 14px; font-weight: 700; border: 1px solid; }
-pre { background: var(--navy) !important; color: #fff; border-radius: 12px; padding: 18px 22px; font-size: 19px; line-height: 1.35; margin: 0; }
+pre { background: var(--navy) !important; color: #fff; border-radius: 12px; padding: 22px 26px; font-size: 22px; line-height: 1.35; margin: 0; }
 pre code { background: transparent; color: inherit; }
 .k { color: var(--cyan); } .v { color: var(--amber); }
-table { font-size: 20px; width: 100%; border-collapse: collapse; } th, td { padding: 10px 14px; border: 1px solid var(--line); text-align: left; }
+table { font-size: 24px; width: 100%; border-collapse: collapse; } th, td { padding: 16px 18px; border: 1px solid var(--line); text-align: left; }
 th { background: var(--navy); color: #fff; } th.g { background: #0E6E63; } td:first-child { font-weight: 700; }
-.big { font-size: 66px; font-weight: 800; line-height: 1; } .fact b { display: block; font-size: 20px; margin-top: 6px; } .fact small { color: var(--mute); font-size: 14px; }
+.big { font-size: 88px; font-weight: 800; line-height: 1; } .fact b { display: block; font-size: 25px; margin-top: 8px; } .fact small { color: var(--mute); font-size: 18px; }
 .stage { flex: 1; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; justify-content: flex-end; }
 .stage .d { font-size: 13px; letter-spacing: 2px; font-weight: 700; } .stage b { font-size: 28px; display: block; margin: 4px 0; } .stage small { font-size: 15px; }
 .gate { width: 56px; align-self: center; border: 2px solid var(--red); color: var(--red); border-radius: 8px; text-align: center; font-size: 12px; font-weight: 800; padding: 10px 0; }
-.quote { font-size: 26px; font-style: italic; margin: 10px 0 22px; }
+.quote { font-size: 32px; font-style: italic; margin: 20px 0 34px; }
 footer { font-size: 12px; color: var(--gray); } section.dark footer { color: #7E92AE; }
 section::after { font-size: 12px; color: var(--gray); } section.dark::after { color: #7E92AE; }
 </style>
@@ -79,7 +79,7 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 
 <div class="chips" style="margin-top:28px"><span>100 % Open Source</span><span>Proxmox VE</span><span>Containerlab</span><span>SR Linux</span><span>gNMI</span><span>Gitea Actions</span></div>
 
-<p style="margin-top:70px;font-weight:700">Víctor Serrano</p>
+<p style="margin-top:70px;font-weight:700">Víctor Serrano Bazán - Consulting System Engineer @ Nokia</p>
 
 <svg style="position:absolute;right:56px;top:60px" width="330" height="150" viewBox="0 0 330 150">
   <g stroke="#38BDF8" stroke-opacity=".55" stroke-width="1.2">
@@ -91,7 +91,7 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 </svg>
 
 <!--
-[0:00] Bienvenida, 20 s de presentación. Gancho: "¿Cuántos seguís tocando la red por SSH cruzando los dedos?". Anuncia: la mitad de la charla es demo en vivo y el repo se lo llevan en un QR.
+[0:00 · 30 s] Bienvenida y presentación. Gancho: "¿Cuántos seguís tocando la red por SSH cruzando los dedos?". Anuncia: un tercio de la charla es demo en vivo y el repo se lo llevan en un QR.
 -->
 
 ---
@@ -100,43 +100,21 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 
 # ¿En qué nivel de autonomía está tu red?
 
-<div class="tags">
-  <div class="tag" style="background:#FCE8F2;border-color:#E4007A;color:#A80E5C;flex:2">la mayoría de redes hoy</div>
-  <div class="tag" style="background:#E7F6F4;border-color:#17B3A3;color:#0E6E63;flex:2">esta charla, con open source</div>
-  <div class="tag" style="background:#fff;border-color:#9AA7B8;color:#5B6B82;flex:2">AIOps (bloque 4)</div>
-</div>
 <div class="ladder">
   <div class="lv g" style="height:22%">L0</div><div class="lv g" style="height:36%">L1</div>
   <div class="lv t" style="height:50%">L2</div><div class="lv t" style="height:64%">L3</div>
   <div class="lv l" style="height:78%">L4</div><div class="lv l" style="height:92%">L5</div>
 </div>
 <div class="lab" style="margin-top:8px">
-  <div><b>Manual</b><small>CLI / SSH</small></div><div><b>Asistida</b><small>scripts, SNMP</small></div>
-  <div><b>Parcial</b><small>IaC + telemetría</small></div><div><b>Condicional</b><small>GitOps + validación</small></div>
-  <div><b>Alta</b><small>closed-loop + IA</small></div><div><b>Autónoma</b><small>agentes</small></div>
+  <div><b>Manual</b><small>CLI / SSH</small></div><div><b>Asistida</b><small>Scripts, SNMP</small></div>
+  <div><b>Parcial</b><small>IaC + Telemetría</small></div><div><b>Condicional</b><small>GitOps + Validación</small></div>
+  <div><b>Alta</b><small>Asistida por agentes IA</small></div><div><b>Autónoma</b><small>Operada por agentes IA</small></div>
 </div>
 <p class="mute" style="font-size:13px;font-style:italic;margin-top:10px">Niveles de autonomía según TM Forum (IG1252)</p>
+<div class="callout"> La mayoría de las redes se encuentran en el nivel 2.</div>
 
 <!--
-[0:30 · 1 min] Escalera de TM Forum. La mayoría de redes de producción siguen en L0/L1: cambios por CLI, monitorización por SNMP. Las apps llevan años en L3. Hoy subimos la red a L2/L3 con herramientas libres; la IA (L4/L5) la dejamos para el final.
--->
-
----
-
-<div class="kick red">Bloque 1 · El problema</div>
-
-# La paradoja actual
-
-<div class="row">
-  <div class="card teal-bg"><h3 style="color:#0E6E63">Apps &amp; Cloud</h3>
-    <ul><li>Infraestructura como código</li><li>GitOps: Git es la fuente de verdad</li><li>CI/CD con validación previa</li><li>Observabilidad y tracing en tiempo real</li></ul></div>
-  <div class="card red-bg"><h3 style="color:#A80E5C">Redes</h3>
-    <ul><li>Configuración manual por CLI / SSH</li><li>Dispositivos <em>snowflake</em></li><li>SNMP: polling reactivo</li><li>Cambios a ciegas, sin validación previa</li></ul></div>
-</div>
-<div class="callout"><b>La red frena la agilidad del resto de la infraestructura.</b> No es culpa del equipo de redes: es falta de tooling y de metodología.</div>
-
-<!--
-[1:30 · 1,5 min] Dos columnas. Insiste: no culpar al ingeniero de red; el problema es de herramientas y proceso. La red es el cuello de botella del CI/CD del negocio.
+[0:30 · 2 min] Escalera de TM Forum. La mayoría de redes de producción siguen en L0/L1: cambios por CLI, monitorización por SNMP. Las apps llevan años en L3. Hoy subimos la red a L2/L3 con herramientas libres; la IA (L4/L5) la dejamos para el final.
 -->
 
 ---
@@ -146,14 +124,16 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 # Lo que cuesta hacerlo a mano
 
 <div class="row">
-  <div class="card"><span class="num" style="background:#E4007A">!</span><h3 style="margin-top:12px">¿Quién cambió qué?</h3><p class="mute">Sin trazabilidad: la config es texto no estructurado y nadie firma los cambios.</p></div>
-  <div class="card"><span class="num" style="background:#F5A524">!</span><h3 style="margin-top:12px">Rollback = volver a teclear</h3><p class="mute">No hay un estado autoritativo al que regresar.</p></div>
-  <div class="card"><span class="num" style="background:#7E92AE">!</span><h3 style="margin-top:12px">MTTR alto</h3><p class="mute">Se descubre tarde (polling) y se diagnostica a mano.</p></div>
+  <div class="card"><span class="num" style="background:#E4007A">!</span><h3 style="margin-top:12px">¿Quién cambió qué?</h3><p class="mute">Sin trazabilidad: los cambios son texto no estructurado que se aplican manualmente por CLI / SSH y nadie los firma.</p></div>
+  <div class="card"><span class="num" style="background:#F5A524">!</span><h3 style="margin-top:12px">Rollback = volver a teclear</h3><p class="mute">Los cambios se aplican a ciegas, sin validación previa, y no hay un estado autoritativo al que regresar.</p></div>
+  <div class="card"><span class="num" style="background:#7E92AE">!</span><h3 style="margin-top:12px">MTTR alto</h3><p class="mute">Las incidencias se descubren tarde (sondeo) y se diagnostican a mano.</p></div>
 </div>
-<div class="callout"><b class="amber">Las operaciones de red deben ser deterministas.</b> Hace falta una fuente de verdad, un modelo de datos y una forma de validar antes de tocar producción.</div>
+<div class="callout"><b class="amber">Las operaciones de red deben ser ágiles y deterministas:</b> Hace falta una fuente de verdad, un modelo de datos y una forma de validar antes de tocar producción.</div>
 
 <!--
-[3:00 · 1,5 min] Tres síntomas y una causa: configuración como texto sin modelo ni estado autoritativo. Planta la promesa: "todo esto se arregla hoy, con open source, y lo vais a ver corriendo". Fin del bloque 1 en el minuto 5.
+[2 min · 5 min] Tres síntomas y una causa: configuración como texto sin modelo ni estado autoritativo. Sin trazabilidad ni rollback, el MTTR se dispara.
+Contexto: desarrollo y sistemas ya adoptaron IaC, observabilidad en tiempo real y GitOps; la red sigue con CLI, SNMP y cambios sin validación previa. Insiste: no culpar al ingeniero de red; el problema es de herramientas y metodología. La red es el cuello de botella del CI/CD del negocio.
+Promesa: todo esto se arregla hoy con open source, y lo vais a ver corriendo.
 -->
 
 ---
@@ -165,11 +145,11 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 # Tres pilares, un bucle cerrado
 
 <div class="row" style="margin-top:16px">
-  <div class="card t"><span class="num" style="background:#17B3A3;color:#17233A">1</span><h3 style="margin-top:14px">Red como código</h3><p style="color:#CFE0F2">Git es la fuente de verdad</p></div>
-  <div class="card a"><span class="num" style="background:#F5A524;color:#17233A">2</span><h3 style="margin-top:14px">Gemelo digital</h3><p style="color:#CFE0F2">Validar antes de desplegar</p></div>
-  <div class="card"><span class="num" style="background:#38BDF8;color:#17233A">3</span><h3 style="margin-top:14px">Telemetría streaming</h3><p style="color:#CFE0F2">La red cuenta lo que pasa</p></div>
+  <div class="card t"><span class="num" style="background:#17B3A3;color:#17233A">1</span><h3 style="margin-top:14px">Red como Código</h3><p style="color:#CFE0F2">Equivalente a IaC: Git es la fuente de verdad (GitOps)</p></div>
+  <div class="card a"><span class="num" style="background:#F5A524;color:#17233A">2</span><h3 style="margin-top:14px">Gemelo digital</h3><p style="color:#CFE0F2">Validar antes de desplegar mediante pipelines CI/CD</p></div>
+  <div class="card"><span class="num" style="background:#38BDF8;color:#17233A">3</span><h3 style="margin-top:14px">Telemetría en streaming</h3><p style="color:#CFE0F2">Observabilidad y trazabilidad en tiempo real donde la red cuenta lo que pasa</p></div>
 </div>
-<p class="cyan" style="text-align:center;font-style:italic;margin-top:34px;font-size:20px">PR → validación en el gemelo → merge → deploy por gNMI → telemetría confirma el efecto</p>
+<p class="cyan" style="text-align:center;font-style:italic;margin-top:34px;font-size:20px">PR → Validación en el Gemelo Digital → Merge → Deploy por gNMI → Telemetría confirma el efecto</p>
 
 <!--
 [5:00 · 1 min] Mapa del bloque 2: tres pilares y cómo se encadenan en un bucle cerrado. Cada uno tiene su slide.
@@ -443,7 +423,7 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
     <span style="color:#AEC2DE;font-size:16px">Sobre un Proxmox modesto, sin gastar un euro en licencias.</span>
   </div>
 </div>
-<p style="color:#7E92AE;margin-top:60px">Víctor Serrano · Tecnocrática Tech Day 2026</p>
+<p style="color:#7E92AE;margin-top:60px">Víctor Serrano Bazán · Tecnocrática Tech Day 2026</p>
 
 <!--
 [29:00] Deja esta slide fija durante las preguntas. Sustituye el placeholder QR por el QR real del repo (por ejemplo: <img src="qr.png" width="150">).
