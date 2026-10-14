@@ -55,6 +55,7 @@ pre { background: var(--navy) !important; color: #fff; border-radius: 12px; padd
 pre code { background: transparent; color: inherit; }
 .k { color: var(--cyan); } .v { color: var(--amber); }
 table { font-size: 24px; width: 100%; border-collapse: collapse; } th, td { padding: 16px 18px; border: 1px solid var(--line); text-align: left; }
+section table { width: max-content; max-width: 100%; margin-left: auto; margin-right: auto; }   /* el tema de Marp pinta la tabla como bloque; asi queda centrada */
 th { background: var(--navy); color: #fff; } th.g { background: #0E6E63; } td:first-child { font-weight: 700; }
 .big { font-size: 88px; font-weight: 800; line-height: 1; } .fact b { display: block; font-size: 25px; margin-top: 8px; } .fact small { color: var(--mute); font-size: 18px; }
 .stage { flex: 1; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; justify-content: flex-end; }
@@ -93,6 +94,7 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 Gancho: "¿Cuántos seguís tocando la red por SSH cruzando los dedos?".
 División por bloques.
 Anuncio: Un tercio de la charla es demo en vivo y el repo se lo llevan en un QR.
+Marp: Automatización de las slides.
 -->
 
 ---
@@ -243,13 +245,13 @@ Contexto OCP 2026: gNMI se ha convertido en la lengua franca sobre interfaces es
 
 <div class="kick amber">Bloque 3 · Demo en vivo</div>
 
-# Llega un rack nuevo de Proxmox
+# Llega un servidor nuevo
 
 ## Onboarding de leaf3: de día 0 a servicio, por Git
 
 <div class="row">
 <div style="flex:1.25">
-<svg width="560" height="290" viewBox="0 0 560 290" style="margin-top:-6px">
+<svg width="580" height="290" viewBox="0 0 580 290" style="margin-top:-6px;overflow:visible">
   <g stroke="#38BDF8" stroke-opacity=".6" stroke-width="1.5">
     <line x1="170" y1="35" x2="60" y2="150"/><line x1="170" y1="35" x2="280" y2="150"/><line x1="170" y1="35" x2="500" y2="150"/>
     <line x1="390" y1="35" x2="60" y2="150"/><line x1="390" y1="35" x2="280" y2="150"/><line x1="390" y1="35" x2="500" y2="150"/>
@@ -296,7 +298,7 @@ Anotaciones: el pipeline marca en Grafana cada deploy, así se ve causa y efecto
   <div class="card teal-bg"><b style="color:#0E6E63">Lo que acabamos de construir le da…</b>
     <ul><li>Intención versionada en Git (fuente de verdad)</li><li>Modelo YANG + gNMI: datos estructurados</li><li>Un gemelo donde probar antes de actuar</li></ul></div>
 </div>
-<div class="callout" style="text-align:center"><b class="amber">Los LLM son probabilísticos; las operaciones de red deben ser deterministas.</b>
+<div class="callout" style="text-align:center"><b class="amber" style="display:block;margin-bottom:8px">Los LLM son probabilísticos; las operaciones de red deben ser deterministas.</b>
 GitOps + telemetría es el suelo (L2–L3) sobre el que la IA puede construir para llegar a L4–L5.</div>
 
 <!--
@@ -317,12 +319,69 @@ Diferentes propuestas de "IA agéntica para operar la red" se apoyan en los tres
 
 # Sense · Think · Act
 
-<div class="row" style="align-items:center">
-  <div class="card a"><h3 class="amber">Sense</h3><b style="font-size:21px">Telemetría gNMI</b><br><small style="color:#CFE0F2">la red publica su estado</small></div><div style="font-size:30px;color:#7E92AE">→</div>
-  <div class="card"><h3 class="cyan">Think</h3><b style="font-size:21px">Validación en el gemelo</b><br><small style="color:#CFE0F2">plan y prerrequisitos</small></div><div style="font-size:30px;color:#7E92AE">→</div>
-  <div class="card t"><h3 class="teal">Act</h3><b style="font-size:21px">Deploy desde Git</b><br><small style="color:#CFE0F2">transacción + verificación</small></div>
-</div>
-<p style="font-size:24px;font-weight:800;margin-top:30px">Código + telemetría + GitOps = bucle cerrado funcional.</p>
+<!-- Diagrama "Networks that sense, think and act" (recreado como SVG a partir de la slide 3 de Automation.pptx) -->
+<svg viewBox="0 0 760 350" width="760" height="350" style="display:block;margin:0 auto" font-family="Calibri, 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#fff"/></marker>
+    <marker id="arc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#38BDF8"/></marker>
+  </defs>
+  <!-- Sense / Think / Act -->
+  <g fill="none" stroke="#fff" stroke-width="2">
+    <rect x="70" y="150" width="120" height="60" rx="10" stroke="#F5A524"/>
+    <rect x="320" y="150" width="120" height="60" rx="10" stroke="#38BDF8"/>
+    <rect x="570" y="150" width="120" height="60" rx="10" stroke="#17B3A3"/>
+    <line x1="192" y1="180" x2="316" y2="180" marker-end="url(#ar)"/>
+    <line x1="442" y1="180" x2="566" y2="180" marker-end="url(#ar)"/>
+  </g>
+  <g font-size="22" font-weight="800" fill="#fff" text-anchor="middle">
+    <text x="130" y="178" fill="#F5A524">Sense</text><text x="380" y="178" fill="#38BDF8">Think</text><text x="630" y="178" fill="#17B3A3">Act</text>
+  </g>
+  <g font-size="13" font-weight="700" fill="#CFE0F2" text-anchor="middle">
+    <text x="130" y="200">Telemetría gNMI</text><text x="380" y="200">Validación en el gemelo</text><text x="630" y="200">Deploy desde Git</text>
+  </g>
+  <!-- Red (nube) y bucle -->
+  <g transform="translate(342,238) scale(3.5)"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="#16304F" stroke="#fff" stroke-width="0.6"/></g>
+  <text x="384" y="296" font-size="16" font-weight="800" fill="#fff" text-anchor="middle">Red</text>
+  <g fill="none" stroke="#fff" stroke-width="2">
+    <path d="M346 292 C 240 292, 150 270, 130 214" marker-end="url(#ar)"/>
+    <path d="M630 214 C 630 270, 540 292, 430 292" marker-end="url(#ar)"/>
+  </g>
+  <text x="218" y="252" font-size="14" font-style="italic" fill="#CFE0F2" text-anchor="middle">Datos</text>
+  <!-- Cerebro (Think) con salidas: analítica · automatización · asistencia a humanos -->
+  <g fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M370 82c-8-2-14 4-12 11c-6 2-6 12 0 14c-1 6 6 10 12 7c3 4 10 4 12 0c6 3 13-1 12-7c6-2 6-12 0-14c2-7-4-13-12-11c-3-4-9-4-12 0z"/>
+    <path d="M380 82v32"/>
+  </g>
+  <g fill="none" stroke="#38BDF8" stroke-width="2" stroke-dasharray="3 5">
+    <line x1="356" y1="98" x2="196" y2="98" marker-end="url(#arc)"/>
+    <line x1="404" y1="98" x2="564" y2="98" marker-end="url(#arc)"/>
+    <line x1="380" y1="78" x2="380" y2="48" marker-end="url(#arc)"/>
+  </g>
+  <!-- Analítica -->
+  <g fill="#fff"><rect x="150" y="96" width="6" height="12"/><rect x="160" y="88" width="6" height="20"/><rect x="170" y="92" width="6" height="16"/></g>
+  <text x="142" y="104" font-size="15" fill="#fff" text-anchor="end">Analítica</text>
+  <!-- Automatización (brazo robot) -->
+  <g fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M580 110h26"/><path d="M593 110v-12l10-10h8"/><circle cx="593" cy="98" r="3" fill="#16304F"/><circle cx="611" cy="88" r="3" fill="#16304F"/>
+  </g>
+  <text x="618" y="104" font-size="15" fill="#fff" text-anchor="start">Automatización</text>
+  <!-- Asistencia a humanos -->
+  <g fill="none" stroke="#fff" stroke-width="2"><circle cx="380" cy="26" r="9"/><path d="M372 40c2 4 14 4 16 0"/></g>
+  <text x="362" y="31" font-size="15" fill="#fff" text-anchor="end">Asistencia a humanos</text>
+  <!-- Agentes IA (robot) -->
+  <g fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round">
+    <rect x="598" y="18" width="24" height="18" rx="4"/><line x1="610" y1="10" x2="610" y2="18"/><circle cx="610" cy="8" r="2" fill="#fff"/>
+    <circle cx="605" cy="27" r="2" fill="#fff"/><circle cx="615" cy="27" r="2" fill="#fff"/><path d="M602 44h16"/>
+  </g>
+  <text x="630" y="31" font-size="15" fill="#fff" text-anchor="start">Agentes IA</text>
+  <!-- Fuentes externas: web · librerías -->
+  <g fill="none" stroke="#fff" stroke-width="2"><circle cx="30" cy="228" r="11"/><ellipse cx="30" cy="228" rx="5" ry="11"/><line x1="19" y1="228" x2="41" y2="228"/></g>
+  <text x="48" y="233" font-size="15" fill="#fff">Web</text>
+  <g fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><rect x="20" y="258" width="20" height="22" rx="2"/><line x1="26" y1="258" x2="26" y2="280"/></g>
+  <text x="48" y="273" font-size="15" fill="#fff">Librerías</text>
+  <path d="M62 252 C 40 228, 42 184, 66 172" fill="none" stroke="#fff" stroke-width="2" marker-end="url(#ar)"/>
+</svg>
+<p style="font-size:24px;font-weight:800;margin-top:14px">Código + telemetría + GitOps = bucle cerrado funcional.</p>
 <p class="cyan" style="font-size:20px;font-style:italic">La red pasa a integrarse en el pipeline del negocio.</p>
 
 <!--
@@ -340,7 +399,9 @@ Cierre con actualidad: Meta dice que la red para IA "es un problema de diseño c
 
 <p class="cyan" style="font-size:22px">Todo el laboratorio está basado en componentes open source y es totalmente reproducible</p>
 <div class="row" style="align-items:center;margin-top:30px">
-  <div style="width:150px;height:150px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#0E2038;font-weight:800;font-size:28px;flex:none">QR</div>
+  <div style="width:170px;height:170px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none"><!-- QR: https://github.com/serranov/netops-demo (generado con segno; también en slides/qr.png y qr.svg) -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" width="146" height="146" shape-rendering="crispEdges"><path stroke="#0e2038" d="M0 0.5h7m3 0h3m1 0h2m3 0h1m2 0h7m-29 1h1m5 0h1m3 0h1m3 0h3m5 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m2 0h2m1 0h1m1 0h1m2 0h3m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h3m1 0h2m2 0h3m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m4 0h1m2 0h3m1 0h1m3 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m1 0h2m1 0h3m1 0h2m2 0h1m2 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-19 1h1m1 0h1m1 0h2m1 0h2m1 0h1m-21 1h1m2 0h1m1 0h2m1 0h1m1 0h1m1 0h5m4 0h1m1 0h1m-22 1h1m2 0h1m1 0h1m1 0h1m10 0h1m1 0h1m2 0h1m2 0h1m-28 1h3m1 0h4m1 0h1m5 0h2m1 0h1m1 0h1m2 0h4m-27 1h1m1 0h1m4 0h1m1 0h4m6 0h1m3 0h1m1 0h2m-28 1h2m1 0h2m1 0h1m3 0h1m3 0h1m2 0h1m3 0h2m2 0h1m1 0h2m-29 1h1m1 0h3m2 0h6m6 0h3m-20 1h1m3 0h1m4 0h2m3 0h1m3 0h1m1 0h7m-29 1h2m1 0h2m2 0h1m1 0h2m2 0h1m1 0h1m1 0h2m1 0h3m2 0h1m1 0h1m-28 1h4m1 0h2m1 0h1m2 0h4m1 0h2m2 0h1m2 0h1m3 0h1m-26 1h4m1 0h1m6 0h1m1 0h1m1 0h1m1 0h4m1 0h1m2 0h1m-29 1h1m1 0h1m1 0h1m1 0h2m1 0h1m3 0h1m3 0h1m3 0h1m1 0h2m2 0h2m-27 1h4m1 0h1m3 0h3m3 0h1m2 0h2m1 0h2m2 0h2m-29 1h1m2 0h1m1 0h3m6 0h3m1 0h7m1 0h1m-19 1h6m2 0h1m2 0h2m3 0h1m1 0h3m-29 1h7m3 0h5m2 0h1m2 0h1m1 0h1m1 0h1m2 0h1m-28 1h1m5 0h1m1 0h2m3 0h1m1 0h2m1 0h1m1 0h1m3 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h1m1 0h1m1 0h1m2 0h1m2 0h5m2 0h2m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h2m4 0h2m1 0h6m-28 1h1m1 0h3m1 0h1m4 0h2m6 0h2m3 0h3m1 0h1m-29 1h1m5 0h1m3 0h2m3 0h3m1 0h3m2 0h1m2 0h1m-28 1h7m1 0h2m3 0h1m3 0h1m2 0h6m1 0h1"/></svg>
+  </div>
   <div style="padding-left:10px">
     <b style="font-size:24px">github.com/serranov/netops-demo</b><br>
     <span style="color:#AEC2DE;font-size:16px">Containerlab · SR Linux · gNMIc · Prometheus · Grafana · Gitea Actions</span><br>
