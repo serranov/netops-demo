@@ -73,11 +73,9 @@ section::after { font-size: 12px; color: var(--gray); } section.dark::after { co
 
 # <span style="font-size:60px">Redes como Código</span>
 
-## Aplicación de GitOps en gemelos digitales
+## Aplicación de mecanismos GitOps sobre Gemelos Digitales
 
-<p style="color:#AEC2DE;max-width:820px">Config-as-code, validación en un gemelo y telemetría en streaming sobre una fabric Nokia SR Linux en Containerlab.</p>
-
-<div class="chips" style="margin-top:28px"><span>100 % Open Source</span><span>Proxmox VE</span><span>Containerlab</span><span>SR Linux</span><span>gNMI</span><span>Gitea Actions</span></div>
+<div class="chips" style="margin-top:28px"><span>Proxmox VE</span><span>Containerlab</span><span>SR Linux</span><span>Telemetría</span></div>
 
 <p style="margin-top:70px;font-weight:700">Víctor Serrano Bazán - Consulting System Engineer @ Nokia</p>
 
@@ -163,7 +161,7 @@ Los tres pilares son también los tres temas recurrentes de la parte de redes de
 
 <div class="kick teal">Pilar 1 · Red como código</div>
 
-# La intención vive en Git, no en el router
+# La intención vive en Git, no en el equipo
 
 <div class="row">
 <div style="flex:1.1">
@@ -182,8 +180,8 @@ Los tres pilares son también los tres temas recurrentes de la parte de redes de
 <p>Declarativo, mínimo, revisable en un Pull Request.</p>
 <div class="kick red" style="margin-top:18px">Cómo se aplica</div>
 <p>Reconciliación idempotente contra el estado real del nodo, en una transacción.</p>
-<div class="chips"><span>gNMIc set</span><span style="border-color:#38BDF8">Ansible</span><span style="border-color:#F5A524">Nornir</span></div>
-<p class="mute" style="font-style:italic;font-size:16px;margin-top:22px">→ Modelo YANG de SR Linux: lo que configuras es lo que consultas</p>
+<div class="chips"><span>gNMI</span><span style="border-color:#38BDF8">Ansible</span><span style="border-color:#F5A524">Nornir</span></div>
+<p class="mute" style="font-style:italic;font-size:16px;margin-top:22px">→ Modelo YANG: lo que configuras es lo que consultas</p>
 </div>
 </div>
 <!--
@@ -194,6 +192,9 @@ Refuerzo OCP 2026: Meta y Nexthop AI contaron cómo abrieron FBOSS a terceros co
 ---
 
 <div class="kick amber">Pilar 2 · Gemelo digital</div>
+
+# Así validan los grandes
+
 <div class="row">
   <div class="card teal-bg"><h3 style="color:#0E6E63">Emulación <em>lógica</em></h3>
     <p style="font-size:18px">Ejecución de <b>software real</b> sobre nodos de cómputo, red, almacenamiento y orquestación para validar flujos extremo a extremo <b>antes de desplegar el hierro</b>.</p></div>
@@ -210,6 +211,7 @@ Refuerzo OCP 2026: Meta y Nexthop AI contaron cómo abrieron FBOSS a terceros co
 ---
 
 <div class="kick cyan">Pilar 3 · Telemetría</div>
+
 # Streaming (gNMI) frente a polling (SNMP)
 
 | | SNMP | <span style="color:#fff">gNMI / gRPC</span> |
